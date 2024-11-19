@@ -1,11 +1,11 @@
 # AWS Dev Challenge Project
 
-Table of Contents
-
-* [Project Overview](##Project Overview)
-* [Key Features](##Key Features)
-* [How to Run the Project](## How to Run the Project)
-* [Team Members](## Team Members)
+## Table of Contents
+- [Project Overview](#project-overview)
+- [Key Features](#key-features)
+- [How to Run the Project](#how-to-run-the-project)
+- [Project Directory Structure](#project-directory-structure)
+- [Team Members](#team-members)
 
 ## Project Overview
 

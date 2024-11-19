@@ -8,7 +8,6 @@
 - [Team Members](#team-members)
 
 # Project Overview
----
 
 ## Key Features
 
@@ -24,19 +23,18 @@
 4. **React Frontend**  
    Built with React, the application delivers a modern and responsive user interface. The React framework ensures component-based architecture, fast rendering, and seamless user interactions.
 
----
 
 ## How to Run the Project
 
 ### 1. Clone the Repository
 Clone the project to your local environment using the following command:
-```bash
+```
 git clone git@github.com:wuqiujie/AWS_Game_Challenge.git
-```bash
+```
 
 ### 2. Install Dependencies
 Make sure you have Node.js and npm installed. Then, install dependencies:
-   `npm install`
+   ```npm install```
 
 ### 3. Set Up AWS Configuration
 * Identity Pool ID: 

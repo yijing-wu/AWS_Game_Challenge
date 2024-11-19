@@ -7,7 +7,8 @@
 - [Project Directory Structure](#project-directory-structure)
 - [Team Members](#team-members)
 
-# Project Overview
+## Project Overview
+TBD
 
 ## Key Features
 
@@ -34,7 +35,9 @@ git clone git@github.com:wuqiujie/AWS_Game_Challenge.git
 
 ### 2. Install Dependencies
 Make sure you have Node.js and npm installed. Then, install dependencies:
-   ```npm install```
+   ```
+   npm install
+   ```
 
 ### 3. Set Up AWS Configuration
 * Identity Pool ID: 
@@ -42,7 +45,10 @@ Make sure you have Node.js and npm installed. Then, install dependencies:
 * AWS Credentials: 
     Ensure that your AWS credentials are configured locally or via environment variables.
 ### 4. Run the Application 
-    Start the application locally: `npm start`
+    Start the application locally: 
+    ```
+    npm start
+    ```
 
 ## Team Members
 * [Kristin Wu](https://github.com/wuqiujie)

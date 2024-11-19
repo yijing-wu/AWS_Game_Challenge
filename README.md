@@ -45,7 +45,7 @@ Make sure you have Node.js and npm installed. Then, install dependencies:
 * AWS Credentials: 
     Ensure that your AWS credentials are configured locally or via environment variables.
 ### 4. Run the Application 
-    Start the application locally: 
+Start the application locally: 
     ```
     npm start
     ```

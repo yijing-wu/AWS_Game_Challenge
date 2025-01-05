@@ -405,17 +405,33 @@
 
             // // Play all notes simultaneously with reduced volume
             // playChord();
+            playMusic(savedNotes);
 
-            let currentIndex = 0;
+            // let currentIndex = 0;
         
-            // Play the first note immediately
-            playNote(savedNotes[currentIndex]);
+            // // Play the first note immediately
+            // playNote(savedNotes[currentIndex]);
         
-            // Set up the interval for subsequent notes
-            playingInterval = setInterval(() => {
-                currentIndex = (currentIndex + 1) % savedNotes.length;
-                playNote(savedNotes[currentIndex]);
-            }, 500);
+            // // Set up the interval for subsequent notes
+            // playingInterval = setInterval(() => {
+            //     currentIndex = (currentIndex + 1) % savedNotes.length;
+            //     playNote(savedNotes[currentIndex]);
+            // }, 500);
+        }
+
+        function playMusic(melodyNotes) {
+            const startTime = audioContext.currentTime;
+            const chordDuration = 1.5;
+            
+            for (let i = 0; i < 4; i++) {
+                const chord = eminorChords[Math.floor(Math.random() * chords.length)];
+                playChord(chord, chordDuration, startTime + i * chordDuration);
+            }
+
+            // const melodyNotes = [notes.E, notes.G, notes.A, notes.B, notes.G, notes.Fsharp, notes.E];
+            melodyNotes.forEach((note, index) => {
+                playNote(note, 0.4, startTime + index * 0.4);
+            });
         }
 
         // function playChord() {

@@ -242,7 +242,7 @@
     
 
     <div class="saved-notes">
-        <h2>Last 3 Notes Played</h2>
+        <h2>Last 5 Notes Played</h2>
         <div class="saved-sequence" id="savedSequence">
             <!-- Saved notes will be displayed here -->
         </div>
@@ -262,6 +262,18 @@
         // Display saved notes on page load
         displaySavedNotes();
 
+        // E minor
+        const frequencies = {
+            'E': 329.63,  // Root note
+            'F#': 369.99, // Second
+            'G': 392.00,  // Minor third
+            'A': 440.00,  // Fourth
+            'B': 493.88,  // Fifth
+            'C': 523.25,  // Minor sixth
+            'D': 587.33,  // Minor seventh
+            'E2': 659.26  // Octave
+        };
+
         const eminorChords = {
             // Basic triads
             'Em': ['E', 'G', 'B'],         // i (tonic)
@@ -273,6 +285,18 @@
             'D': ['D', 'F#', 'A'],         // VII (major)
         };
 
+        // const rhythmPattern = [0.8, 0.4, 0.6, 1.0, 0.5, 0.3, 0.7, 1.2];
+
+        // Create a single shared AudioContext at the global level
+        let sharedAudioContext = null;
+
+        function getAudioContext() {
+            if (!sharedAudioContext) {
+                sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return sharedAudioContext;
+        }
+
         function playChord(chordName) {
             const chord = eminorChords[chordName];
             if (!chord) return;
@@ -281,55 +305,41 @@
             });
         }
 
+        function playNote(note, isChord, duration = 0.5) {
+            const audioContext = getAudioContext();
 
-        function playNote(note) {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // Resume the context if it's suspended
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
 
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 
-            // const frequencies = {
-            //     'C': 261.63, // Middle C
-            //     'D': 293.66,
-            //     'E': 329.63,
-            //     'F': 349.23,
-            //     'G': 392.00,
-            //     'A': 440.00,
-            //     'B': 493.88
-            // };
-
-            // E minor
-            const frequencies = {
-                'E': 329.63,  // Root note
-                'F#': 369.99, // Second
-                'G': 392.00,  // Minor third
-                'A': 440.00,  // Fourth
-                'B': 493.88,  // Fifth
-                'C': 523.25,  // Minor sixth
-                'D': 587.33,  // Minor seventh
-                'E2': 659.26  // Octave
-            };
-
-
             // Save the note
-            if (!isPlaying) {
+            if (!isPlaying && !isChord) {
                 saveNote(note);
             }
 
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(frequencies[note], audioContext.currentTime);
 
-            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            // Set different volumes for melody notes and chord notes
+            const initialGain = isChord ? 0.15 : 0.5; // Reduced volume for chord notes
+            gainNode.gain.setValueAtTime(initialGain, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
 
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
             oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.5);
+            oscillator.stop(audioContext.currentTime + duration);
 
-            // playChord('Em');  // Plays E minor chord
-
+            // Clean up
+            oscillator.onended = () => {
+                oscillator.disconnect();
+                gainNode.disconnect();
+            };
         }
 
         // Only the relevant JavaScript functions need to change:
@@ -338,9 +348,9 @@
             // Add new note to the end of the array
             savedNotes.push(note);
             
-            // Keep only the last 3 notes by removing from the beginning if needed
-            if (savedNotes.length > 3) {
-                savedNotes = savedNotes.slice(-3);
+            // Keep only the last 5 notes by removing from the beginning if needed
+            if (savedNotes.length > 5) {
+                savedNotes = savedNotes.slice(-5);
             }
             
             // Save to localStorage
@@ -354,8 +364,8 @@
             const container = document.getElementById('savedSequence');
             container.innerHTML = '';
             
-            // Fill empty slots with placeholder at the beginning if less than 3 notes
-            const remainingSlots = 3 - savedNotes.length;
+            // Fill empty slots with placeholder at the beginning if less than 5 notes
+            const remainingSlots = 5 - savedNotes.length;
             for (let i = 0; i < remainingSlots; i++) {
                 const emptySlot = document.createElement('div');
                 emptySlot.className = 'saved-note';
@@ -388,6 +398,11 @@
                 isPlaying = false;
                 button.textContent = 'Play Sequence';
                 button.style.backgroundColor = '#4CAF50';
+
+                // Optionally suspend the audio context when stopping
+                if (sharedAudioContext) {
+                    sharedAudioContext.suspend();
+                }
                 return;
             }
         
@@ -401,46 +416,52 @@
             isPlaying = true;
             button.textContent = 'Stop Sequence';
             button.style.backgroundColor = '#ff6b6b';
-    
 
-            // // Play all notes simultaneously with reduced volume
-            // playChord();
-            playMusic(savedNotes);
-
-            // let currentIndex = 0;
-        
-            // // Play the first note immediately
-            // playNote(savedNotes[currentIndex]);
-        
-            // // Set up the interval for subsequent notes
-            // playingInterval = setInterval(() => {
-            //     currentIndex = (currentIndex + 1) % savedNotes.length;
-            //     playNote(savedNotes[currentIndex]);
-            // }, 500);
-        }
-
-        function playMusic(melodyNotes) {
-            const startTime = audioContext.currentTime;
-            const chordDuration = 1.5;
-            
-            for (let i = 0; i < 4; i++) {
-                const chord = eminorChords[Math.floor(Math.random() * chords.length)];
-                playChord(chord, chordDuration, startTime + i * chordDuration);
+            // Generate random jazz-inspired durations
+            function generateJazzDurations(count) {
+                const durations = [];
+                for (let i = 0; i < count; i++) {
+                    const swing = Math.random() > 0.8 ? 0.96 : 0.64; // Swing feel (60-40% ratio)
+                    const base = Math.random() * 0.64 + 0.64; // Base duration between 0.4s and 0.8s
+                    durations.push(base * swing); // Apply swing factor
+                }
+                return durations;
             }
 
-            // const melodyNotes = [notes.E, notes.G, notes.A, notes.B, notes.G, notes.Fsharp, notes.E];
-            melodyNotes.forEach((note, index) => {
-                playNote(note, 0.4, startTime + index * 0.4);
-            });
+            const rhythmPattern = generateJazzDurations(savedNotes.length); // Random jazz durations
+
+
+            let currentIndex = 0;
+            const availableChords = Object.keys(eminorChords); // Extract keys from eminorChords
+
+            async function playNotesWithRhythm() {
+                if (!isPlaying) return;
+
+                const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
+                
+                // Play the melody note
+                playNote(savedNotes[currentIndex], false, duration);
+                
+                // Play a random chord with reduced volume
+                const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
+                const chordNotes = eminorChords[randomChordName];
+                chordNotes.forEach(note => {
+                    playNote(note, true, duration);
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, duration * 1000));
+                
+                currentIndex = (currentIndex + 1) % savedNotes.length;
+                
+                if (isPlaying) {
+                    playNotesWithRhythm();
+                }
+            }
+
+
+            // Start the sequence
+            playNotesWithRhythm();
         }
-
-        // function playChord() {
-        //     // Play each note in the saved sequence simultaneously
-        //     savedNotes.forEach(note => {
-        //         playNote(note, true); // true indicates it's part of a chord
-        //     });
-        // }
-
         
     </script>
 </body>

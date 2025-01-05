@@ -123,6 +123,42 @@
             justify-content: center;
             gap: 10px;
         }
+
+        .chords-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .chord {
+            width: 60px;
+            height: 80px;
+            background-color: #e6e6e6;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        
+        .chord:hover {
+            transform: scale(1.1);
+            background-color: #d4d4d4;
+        }
+        
+        .chord:active {
+            transform: scale(0.95);
+            background-color: #c4c4c4;
+        }
+        
+        .chord-info {
+            text-align: center;
+        }
+        
         
     </style>
 </head>
@@ -178,7 +214,31 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Add a second container for chord buttons -->
+    <div class="chords-container">
+        <div class="chord" onclick="playChord('Em')">
+            <div class="chord-info">Em</div>
+        </div>
+        <div class="chord" onclick="playChord('F#dim')">
+            <div class="chord-info">F#dim</div>
+        </div>
+        <div class="chord" onclick="playChord('G')">
+            <div class="chord-info">G</div>
+        </div>
+        <div class="chord" onclick="playChord('Am')">
+            <div class="chord-info">Am</div>
+        </div>
+        <div class="chord" onclick="playChord('Bm')">
+            <div class="chord-info">Bm</div>
+        </div>
+        <div class="chord" onclick="playChord('C')">
+            <div class="chord-info">C</div>
+        </div>
+        <div class="chord" onclick="playChord('D')">
+            <div class="chord-info">D</div>
+        </div>
+    </div>
     
 
     <div class="saved-notes">
@@ -213,27 +273,11 @@
             'D': ['D', 'F#', 'A'],         // VII (major)
         };
 
-
         function playChord(chordName) {
             const chord = eminorChords[chordName];
             if (!chord) return;
-
             chord.forEach(note => {
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(frequencies[note], audioContext.currentTime);
-
-                // Reduce gain for chords to avoid distortion
-                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-
-                oscillator.start();
-                oscillator.stop(audioContext.currentTime + 0.5);
+                playNote(note, true); // true indicates it's part of a chord
             });
         }
 
@@ -359,8 +403,8 @@
             button.style.backgroundColor = '#ff6b6b';
     
 
-            // Play all notes simultaneously with reduced volume
-            playChord();
+            // // Play all notes simultaneously with reduced volume
+            // playChord();
 
             let currentIndex = 0;
         
@@ -374,12 +418,12 @@
             }, 500);
         }
 
-        function playChord() {
-            // Play each note in the saved sequence simultaneously
-            savedNotes.forEach(note => {
-                playNote(note, true); // true indicates it's part of a chord
-            });
-        }
+        // function playChord() {
+        //     // Play each note in the saved sequence simultaneously
+        //     savedNotes.forEach(note => {
+        //         playNote(note, true); // true indicates it's part of a chord
+        //     });
+        // }
 
         
     </script>

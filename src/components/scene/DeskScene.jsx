@@ -15,7 +15,7 @@ import NightLighting from "./environment/NightLighting";
 import Ground from "./environment/Ground";
 import FogEffect from "./environment/FogEffect";
 
-export default function DeskScene() {
+export default function DeskScene({ onComputerClick }) {
   return (
     <>
       <Stars />
@@ -25,7 +25,7 @@ export default function DeskScene() {
       <FogEffect />
       <Pen position={[0.3, -0.28, 4.3]} />
       <Desk position={[0, -1.1, 4.3]} />
-      <Computer position={[0, -0.55, 5.2]} />
+      <Computer position={[0, -0.55, 5.2]} onClick={onComputerClick} />
       <Lamp position={[0.5, -0.25, 4.2]} />
       <Books position={[-0.35, -0.25, 4.2]} />
       {/*

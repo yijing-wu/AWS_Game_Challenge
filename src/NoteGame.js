@@ -8,7 +8,7 @@ export default function NoteGame({ hitCount, setHitCount }) {
   // 定时生成音符或炸弹
   useEffect(() => {
     const interval = setInterval(() => {
-      const objectTypes = ["note",  "bomb"];
+      const objectTypes = ["noteE","noteF","noteG","noteA","noteB","noteC","noteD","bomb"];
       const randomType = objectTypes[Math.floor(Math.random() * objectTypes.length)];
       setGameObjects((prev) => [
         ...prev,
@@ -16,7 +16,8 @@ export default function NoteGame({ hitCount, setHitCount }) {
           id: Date.now(),
           type: randomType,
          position: [Math.random()  - 0.5, 1, 4.4],  
-         speed: Math.random() * 0.001 + 0.005, // 随机下落速度
+         speed: Math.random() * 0.001 + 0.005, 
+         color: `hsl(${Math.random() * 360}, 100%, 50%)`, 
         },
       ]);
     }, 500); // 每500ms生成一个物体
@@ -61,13 +62,9 @@ useFrame(() => {
               <meshStandardMaterial color="red" />
             </mesh>
           ) : (
-            // <mesh>
-            //   <Note scale={[4, 4, 4]} /> 
-            // </mesh> 
-            
-            <mesh scale={[0.2, 0.2, 0.2]}> 
+            <mesh scale={[0.2, 0.2, 0.2]}>
             <sphereGeometry args={[0.2, 16, 16]} />
-            <meshStandardMaterial color="blue" />
+            <meshStandardMaterial color={obj.color} />
             </mesh>
           )}
         </group>

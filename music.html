@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Musical Notes</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .notes-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 50px;
+        }
+
+        .note {
+            width: 60px;
+            height: 100px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .note:hover {
+            transform: scale(1.1);
+            background-color: #e6e6e6;
+        }
+
+        .note:active {
+            transform: scale(0.95);
+            background-color: #d4d4d4;
+        }
+
+        .note-text {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .saved-notes {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .saved-notes h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .saved-sequence {
+            display: flex;
+            gap: 10px;
+            min-height: 40px;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .saved-note {
+            padding: 8px 15px;
+            background-color: #e6e6e6;
+            border-radius: 5px;
+            font-weight: bold;
+            min-width: 30px;
+        }
+
+        .clear-button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .clear-button:hover {
+            background-color: #ff5252;
+        }
+
+        .note-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .play-button {
+            margin-top: 10px;
+            margin-left: 10px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .play-button:hover {
+            background-color: #45a049;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>Musical Notes</h1>
+    <div class="notes-container">
+        <div class="note" onclick="playNote('E')">
+            <div class="note-info">
+                <div>E</div>
+                <div class="note-text">Do</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('F#')">
+            <div class="note-info">
+                <div>F#</div>
+                <div class="note-text">Re</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('G')">
+            <div class="note-info">
+                <div>G</div>
+                <div class="note-text">Mi</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('A')">
+            <div class="note-info">
+                <div>A</div>
+                <div class="note-text">Fa</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('B')">
+            <div class="note-info">
+                <div>B</div>
+                <div class="note-text">Sol</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('C')">
+            <div class="note-info">
+                <div>C</div>
+                <div class="note-text">La</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('D')">
+            <div class="note-info">
+                <div>D</div>
+                <div class="note-text">Ti</div>
+            </div>
+        </div>
+        <div class="note" onclick="playNote('E2')">
+            <div class="note-info">
+                <div>E</div>
+                <div class="note-text">Do</div>
+            </div>
+        </div>
+    </div>
+    
+    
+
+    <div class="saved-notes">
+        <h2>Last 3 Notes Played</h2>
+        <div class="saved-sequence" id="savedSequence">
+            <!-- Saved notes will be displayed here -->
+        </div>
+        <div class="button-container">
+            <button class="clear-button" onclick="clearSavedNotes()">Clear Saved Notes</button>
+            <button class="play-button" onclick="playSequence()">Play Sequence</button>
+        </div>
+    </div>
+
+
+    <script>
+        // Initialize saved notes from localStorage or empty array if none exists
+        let savedNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
+        let isPlaying = false;
+        let playingInterval;
+        
+        // Display saved notes on page load
+        displaySavedNotes();
+
+        const eminorChords = {
+            // Basic triads
+            'Em': ['E', 'G', 'B'],         // i (tonic)
+            'F#dim': ['F#', 'A', 'C'],     // ii° (diminished)
+            'G': ['G', 'B', 'D'],          // III (major)
+            'Am': ['A', 'C', 'E'],         // iv (minor)
+            'Bm': ['B', 'D', 'F#'],        // v (minor)
+            'C': ['C', 'E', 'G'],          // VI (major)
+            'D': ['D', 'F#', 'A'],         // VII (major)
+        };
+
+
+        function playChord(chordName) {
+            const chord = eminorChords[chordName];
+            if (!chord) return;
+
+            chord.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequencies[note], audioContext.currentTime);
+
+                // Reduce gain for chords to avoid distortion
+                gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+            });
+        }
+
+
+        function playNote(note) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            // const frequencies = {
+            //     'C': 261.63, // Middle C
+            //     'D': 293.66,
+            //     'E': 329.63,
+            //     'F': 349.23,
+            //     'G': 392.00,
+            //     'A': 440.00,
+            //     'B': 493.88
+            // };
+
+            // E minor
+            const frequencies = {
+                'E': 329.63,  // Root note
+                'F#': 369.99, // Second
+                'G': 392.00,  // Minor third
+                'A': 440.00,  // Fourth
+                'B': 493.88,  // Fifth
+                'C': 523.25,  // Minor sixth
+                'D': 587.33,  // Minor seventh
+                'E2': 659.26  // Octave
+            };
+
+
+            // Save the note
+            if (!isPlaying) {
+                saveNote(note);
+            }
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequencies[note], audioContext.currentTime);
+
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.5);
+
+            // playChord('Em');  // Plays E minor chord
+
+        }
+
+        // Only the relevant JavaScript functions need to change:
+
+        function saveNote(note) {
+            // Add new note to the end of the array
+            savedNotes.push(note);
+            
+            // Keep only the last 3 notes by removing from the beginning if needed
+            if (savedNotes.length > 3) {
+                savedNotes = savedNotes.slice(-3);
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+            
+            // Update display
+            displaySavedNotes();
+        }
+
+        function displaySavedNotes() {
+            const container = document.getElementById('savedSequence');
+            container.innerHTML = '';
+            
+            // Fill empty slots with placeholder at the beginning if less than 3 notes
+            const remainingSlots = 3 - savedNotes.length;
+            for (let i = 0; i < remainingSlots; i++) {
+                const emptySlot = document.createElement('div');
+                emptySlot.className = 'saved-note';
+                emptySlot.textContent = '-';
+                container.appendChild(emptySlot);
+            }
+
+            // Display saved notes after the empty slots
+            savedNotes.forEach(note => {
+                const noteElement = document.createElement('div');
+                noteElement.className = 'saved-note';
+                noteElement.textContent = note;
+                container.appendChild(noteElement);
+            });
+        }
+
+
+        function clearSavedNotes() {
+            savedNotes = [];
+            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+            displaySavedNotes();
+        }
+
+        function playSequence() {
+            const button = document.querySelector('.play-button');
+            
+            if (isPlaying) {
+                // Stop playing
+                clearInterval(playingInterval);
+                isPlaying = false;
+                button.textContent = 'Play Sequence';
+                button.style.backgroundColor = '#4CAF50';
+                return;
+            }
+        
+            // Don't start if there are no notes
+            if (savedNotes.length === 0) {
+                alert('No notes to play! Please add some notes first.');
+                return;
+            }
+        
+            // Start playing
+            isPlaying = true;
+            button.textContent = 'Stop Sequence';
+            button.style.backgroundColor = '#ff6b6b';
+    
+
+            // Play all notes simultaneously with reduced volume
+            playChord();
+
+            let currentIndex = 0;
+        
+            // Play the first note immediately
+            playNote(savedNotes[currentIndex]);
+        
+            // Set up the interval for subsequent notes
+            playingInterval = setInterval(() => {
+                currentIndex = (currentIndex + 1) % savedNotes.length;
+                playNote(savedNotes[currentIndex]);
+            }, 500);
+        }
+
+        function playChord() {
+            // Play each note in the saved sequence simultaneously
+            savedNotes.forEach(note => {
+                playNote(note, true); // true indicates it's part of a chord
+            });
+        }
+
+        
+    </script>
+</body>
+</html>

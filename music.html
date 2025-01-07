@@ -129,118 +129,111 @@
             gap: 20px;
             margin-top: 30px;
         }
-        
-        .chord {
-            width: 60px;
-            height: 80px;
-            background-color: #e6e6e6;
-            border: 2px solid #333;
-            border-radius: 10px;
-            cursor: pointer;
+
+        .key-selector {
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 16px;
-            font-weight: bold;
-            transition: transform 0.2s, background-color 0.2s;
+            gap: 10px;
+            margin: 20px 0;
         }
         
-        .chord:hover {
-            transform: scale(1.1);
-            background-color: #d4d4d4;
+        .key-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            border: 2px solid #4CAF50;
+            border-radius: 5px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        .chord:active {
-            transform: scale(0.95);
-            background-color: #c4c4c4;
+        .key-button:hover {
+            background-color: #4CAF50;
+            color: white;
         }
         
-        .chord-info {
-            text-align: center;
+        .key-button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .download-button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
         }
         
         
     </style>
 </head>
 <body>
-    <h1>Musical Notes</h1>
+
+    <div class="key-selector">
+        <button onclick="changeKey('eMinor')" class="key-button">E Minor</button>
+        <button onclick="changeKey('gMajor')" class="key-button">G Major</button>
+        <button onclick="changeKey('dMajor')" class="key-button">D Major</button>
+        <button onclick="changeKey('bMajor')" class="key-button">B Major</button>
+        <button onclick="changeKey('aMinor')" class="key-button">A Minor</button>
+    </div>
+    
+    <!-- Add current key display -->
+    <div class="current-key-display">
+        <h2>Current Key: <span id="currentKeyDisplay">E Minor</h2>
+    </div>
+
     <div class="notes-container">
-        <div class="note" onclick="playNote('E')">
+        <div class="note" onclick="playNote(0)">
             <div class="note-info">
-                <div>E</div>
                 <div class="note-text">Do</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('F#')">
+        <div class="note" onclick="playNote(1)">
             <div class="note-info">
-                <div>F#</div>
                 <div class="note-text">Re</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('G')">
+        <div class="note" onclick="playNote(2)">
             <div class="note-info">
-                <div>G</div>
                 <div class="note-text">Mi</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('A')">
+        <div class="note" onclick="playNote(3)">
             <div class="note-info">
-                <div>A</div>
                 <div class="note-text">Fa</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('B')">
+        <div class="note" onclick="playNote(4)">
             <div class="note-info">
-                <div>B</div>
                 <div class="note-text">Sol</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('C')">
+        <div class="note" onclick="playNote(5)">
             <div class="note-info">
-                <div>C</div>
                 <div class="note-text">La</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('D')">
+        <div class="note" onclick="playNote(6)">
             <div class="note-info">
-                <div>D</div>
                 <div class="note-text">Ti</div>
             </div>
         </div>
-        <div class="note" onclick="playNote('E2')">
+        <div class="note" onclick="playNote(7)">
             <div class="note-info">
-                <div>E</div>
                 <div class="note-text">Do</div>
             </div>
         </div>
     </div>
 
-    <!-- Add a second container for chord buttons -->
-    <div class="chords-container">
-        <div class="chord" onclick="playChord('Em')">
-            <div class="chord-info">Em</div>
-        </div>
-        <div class="chord" onclick="playChord('F#dim')">
-            <div class="chord-info">F#dim</div>
-        </div>
-        <div class="chord" onclick="playChord('G')">
-            <div class="chord-info">G</div>
-        </div>
-        <div class="chord" onclick="playChord('Am')">
-            <div class="chord-info">Am</div>
-        </div>
-        <div class="chord" onclick="playChord('Bm')">
-            <div class="chord-info">Bm</div>
-        </div>
-        <div class="chord" onclick="playChord('C')">
-            <div class="chord-info">C</div>
-        </div>
-        <div class="chord" onclick="playChord('D')">
-            <div class="chord-info">D</div>
-        </div>
-    </div>
     
-
+    
     <div class="saved-notes">
         <h2>Last 5 Notes Played</h2>
         <div class="saved-sequence" id="savedSequence">
@@ -252,49 +245,193 @@
         </div>
     </div>
 
-
+    <button onclick="downloadSequence()" class="download-button">Download Sequence</button>
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
     <script>
         // Initialize saved notes from localStorage or empty array if none exists
         let savedNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
         let isPlaying = false;
         let playingInterval;
+        let currentKey = 'eMinor';
+        let frequencies = {};
+        let chords = {};
         
+        // Separate audio contexts for notes and chords
+        let noteAudioContext = null;
+        let chordAudioContext = null;
+        
+        const musicalScales = {
+            eMinor: {
+                frequencies: {
+                    'E': 329.63,  // Root note
+                    'F#': 369.99, // Second
+                    'G': 392.00,  // Minor third
+                    'A': 440.00,  // Fourth
+                    'B': 493.88,  // Fifth
+                    'C': 523.25,  // Minor sixth
+                    'D': 587.33,  // Minor seventh
+                    'E2': 659.26  // Octave
+                },
+                chords: {
+                    'Em': ['E', 'G', 'B'],         // i (tonic)
+                    'F#dim': ['F#', 'A', 'C'],     // ii° (diminished)
+                    'G': ['G', 'B', 'D'],          // III (major)
+                    'Am': ['A', 'C', 'E'],         // iv (minor)
+                    'Bm': ['B', 'D', 'F#'],        // v (minor)
+                    'C': ['C', 'E', 'G'],          // VI (major)
+                    'D': ['D', 'F#', 'A'],         // VII (major)
+                }
+            },
+        
+            gMajor: {
+                frequencies: {
+                    'G': 392.00,   // Root note
+                    'A': 440.00,   // Second
+                    'B': 493.88,   // Third
+                    'C': 523.25,   // Fourth
+                    'D': 587.33,   // Fifth
+                    'E': 659.26,   // Sixth
+                    'F#': 739.99,  // Seventh
+                    'G2': 783.99   // Octave
+                },
+                chords: {
+                    'G': ['G', 'B', 'D'],          // I (tonic)
+                    'Am': ['A', 'C', 'E'],         // ii (minor)
+                    'Bm': ['B', 'D', 'F#'],        // iii (minor)
+                    'C': ['C', 'E', 'G'],          // IV (major)
+                    'D': ['D', 'F#', 'A'],         // V (major)
+                    'Em': ['E', 'G', 'B'],         // vi (minor)
+                    'F#dim': ['F#', 'A', 'C'],     // vii° (diminished)
+                }
+            },
+        
+            dMajor: {
+                frequencies: {
+                    'D': 587.33,   // Root note
+                    'E': 659.26,   // Second
+                    'F#': 739.99,  // Third
+                    'G': 783.99,   // Fourth
+                    'A': 880.00,   // Fifth
+                    'B': 987.77,   // Sixth
+                    'C#': 1108.73, // Seventh
+                    'D2': 1174.66  // Octave
+                },
+                chords: {
+                    'D': ['D', 'F#', 'A'],         // I (tonic)
+                    'Em': ['E', 'G', 'B'],         // ii (minor)
+                    'F#m': ['F#', 'A', 'C#'],      // iii (minor)
+                    'G': ['G', 'B', 'D'],          // IV (major)
+                    'A': ['A', 'C#', 'E'],         // V (major)
+                    'Bm': ['B', 'D', 'F#'],        // vi (minor)
+                    'C#dim': ['C#', 'E', 'G'],     // vii° (diminished)
+                }
+            },
+        
+            bMajor: {
+                frequencies: {
+                    'B': 493.88,   // Root note
+                    'C#': 554.37,  // Second
+                    'D#': 622.25,  // Third
+                    'E': 659.26,   // Fourth
+                    'F#': 739.99,  // Fifth
+                    'G#': 830.61,  // Sixth
+                    'A#': 932.33,  // Seventh
+                    'B2': 987.77   // Octave
+                },
+                chords: {
+                    'B': ['B', 'D#', 'F#'],        // I (tonic)
+                    'C#m': ['C#', 'E', 'G#'],      // ii (minor)
+                    'D#m': ['D#', 'F#', 'A#'],     // iii (minor)
+                    'E': ['E', 'G#', 'B'],         // IV (major)
+                    'F#': ['F#', 'A#', 'C#'],      // V (major)
+                    'G#m': ['G#', 'B', 'D#'],      // vi (minor)
+                    'A#dim': ['A#', 'C#', 'E'],    // vii° (diminished)
+                }
+            },
+        
+            aMinor: {
+                frequencies: {
+                    'A': 440.00,   // Root note
+                    'B': 493.88,   // Second
+                    'C': 523.25,   // Minor third
+                    'D': 587.33,   // Fourth
+                    'E': 659.26,   // Fifth
+                    'F': 698.46,   // Minor sixth
+                    'G': 783.99,   // Minor seventh
+                    'A2': 880.00   // Octave
+                },
+                chords: {
+                    'Am': ['A', 'C', 'E'],         // i (tonic)
+                    'Bdim': ['B', 'D', 'F'],       // ii° (diminished)
+                    'C': ['C', 'E', 'G'],          // III (major)
+                    'Dm': ['D', 'F', 'A'],         // iv (minor)
+                    'Em': ['E', 'G', 'B'],         // v (minor)
+                    'F': ['F', 'A', 'C'],          // VI (major)
+                    'G': ['G', 'B', 'D'],          // VII (major)
+                }
+            }
+        };
+
         // Display saved notes on page load
         displaySavedNotes();
 
-        // E minor
-        const frequencies = {
-            'E': 329.63,  // Root note
-            'F#': 369.99, // Second
-            'G': 392.00,  // Minor third
-            'A': 440.00,  // Fourth
-            'B': 493.88,  // Fifth
-            'C': 523.25,  // Minor sixth
-            'D': 587.33,  // Minor seventh
-            'E2': 659.26  // Octave
-        };
-
-        const eminorChords = {
-            // Basic triads
-            'Em': ['E', 'G', 'B'],         // i (tonic)
-            'F#dim': ['F#', 'A', 'C'],     // ii° (diminished)
-            'G': ['G', 'B', 'D'],          // III (major)
-            'Am': ['A', 'C', 'E'],         // iv (minor)
-            'Bm': ['B', 'D', 'F#'],        // v (minor)
-            'C': ['C', 'E', 'G'],          // VI (major)
-            'D': ['D', 'F#', 'A'],         // VII (major)
-        };
-
-        // const rhythmPattern = [0.8, 0.4, 0.6, 1.0, 0.5, 0.3, 0.7, 1.2];
-
         // Create a single shared AudioContext at the global level
-        let sharedAudioContext = null;
-
-        function getAudioContext() {
-            if (!sharedAudioContext) {
-                sharedAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        function getNoteAudioContext() {
+            if (!noteAudioContext) {
+                noteAudioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-            return sharedAudioContext;
+            return noteAudioContext;
+        }
+
+        function getChordAudioContext() {
+            if (!chordAudioContext) {
+                chordAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return chordAudioContext;
+        }
+
+        function changeKey(newKey) {
+            // Update current key
+            currentKey = newKey;
+            
+            // Update the display text
+            const displayText = newKey.replace(/([A-Z])/g, ' $1').trim()
+                                     .replace('Minor', ' Minor')
+                                     .replace('Major', ' Major');
+            document.getElementById('currentKeyDisplay').textContent = displayText;
+            
+            // Update button styles
+            document.querySelectorAll('.key-button').forEach(button => {
+                if (button.textContent.toLowerCase().includes(newKey.toLowerCase())) {
+                    button.classList.add('active');
+                } else {
+                    button.classList.remove('active');
+                }
+            });
+        
+            // Get and verify the frequencies and chords for the new key
+            frequencies = getFrequenciesForKey(currentKey);
+            chords = getChordsForKey(currentKey);
+        }
+        
+        
+        // Call changeKey with default key on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            changeKey('eMinor');
+        });
+        
+
+        function getRandomKey() {
+            const keys = Object.keys(musicalScales);
+            return keys[Math.floor(Math.random() * keys.length)];
+        }
+
+        function getFrequenciesForKey(key) {
+            return musicalScales[key].frequencies;
+        }
+
+        function getChordsForKey(key) {
+            return musicalScales[key].chords;
         }
 
         function playChord(chordName) {
@@ -305,36 +442,58 @@
             });
         }
 
-        function playNote(note, isChord, duration = 0.5) {
-            const audioContext = getAudioContext();
-
+        function playNote(order, duration = 0.5) {
+            // Ensure order is a number
+            if (typeof order !== 'number' || isNaN(order)) {
+                console.error('Invalid order parameter:', order);
+                return;
+            }
+        
+            const audioContext = getNoteAudioContext();
+        
             // Resume the context if it's suspended
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
-
+        
+            // Get frequencies for current key
+            let currentFrequencies = getFrequenciesForKey(currentKey);
+            // Get array of notes in order
+            let notes = Object.keys(currentFrequencies);
+            
+            // Check if the order is within bounds
+            if (order < 0 || order >= notes.length) {
+                console.error('Order out of bounds:', order, 'notes length:', notes.length);
+                return;
+            }
+        
+            // Get the note name based on order
+            const note = notes[order];
+            // Get the frequency for this note
+            const frequency = currentFrequencies[note];
+        
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-
+        
             // Save the note
-            if (!isPlaying && !isChord) {
-                saveNote(note);
+            if (!isPlaying) {
+                saveNote(order);
             }
-
+        
             oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(frequencies[note], audioContext.currentTime);
-
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        
             // Set different volumes for melody notes and chord notes
-            const initialGain = isChord ? 0.15 : 0.5; // Reduced volume for chord notes
+            const initialGain = 0.2; // Reduced volume for chord notes
             gainNode.gain.setValueAtTime(initialGain, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
+        
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-
+        
             oscillator.start();
             oscillator.stop(audioContext.currentTime + duration);
-
+        
             // Clean up
             oscillator.onended = () => {
                 oscillator.disconnect();
@@ -342,13 +501,59 @@
             };
         }
 
-        // Only the relevant JavaScript functions need to change:
-
-        function saveNote(note) {
-            // Add new note to the end of the array
-            savedNotes.push(note);
+        function playChords(noteNames, duration = 0.3) {
+            const audioContext = getChordAudioContext();
             
-            // Keep only the last 5 notes by removing from the beginning if needed
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            // Get frequencies for current key
+            const currentFrequencies = getFrequenciesForKey(currentKey);
+            
+            noteNames.forEach((noteName, index) => {
+                // Check if the note exists in current key
+                if (currentFrequencies[noteName]) {
+                    let frequency = currentFrequencies[noteName];
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+
+                    // Lower volume for chord notes
+                    const initialGain = 0.05;
+                    gainNode.gain.setValueAtTime(initialGain, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    oscillator.start();
+                    oscillator.stop(audioContext.currentTime + duration);
+
+                    oscillator.onended = () => {
+                        oscillator.disconnect();
+                        gainNode.disconnect();
+                    };
+                } else {
+                    console.warn(`Note ${noteName} not found in key ${currentKey}`);
+                }
+            });
+        }
+        
+
+        // Only the relevant JavaScript functions need to change:
+        function saveNote(order) {
+            // Create a note object with both order and key
+            const noteObject = {
+                order: order,
+                key: currentKey
+            };
+            
+            // Add new note object to the end of the array
+            savedNotes.push(noteObject);
+            
+            // Keep only the last 5 notes
             if (savedNotes.length > 5) {
                 savedNotes = savedNotes.slice(-5);
             }
@@ -359,7 +564,7 @@
             // Update display
             displaySavedNotes();
         }
-
+        
         function displaySavedNotes() {
             const container = document.getElementById('savedSequence');
             container.innerHTML = '';
@@ -372,23 +577,27 @@
                 emptySlot.textContent = '-';
                 container.appendChild(emptySlot);
             }
-
+        
             // Display saved notes after the empty slots
-            savedNotes.forEach(note => {
+            savedNotes.forEach(noteObj => {
                 const noteElement = document.createElement('div');
                 noteElement.className = 'saved-note';
-                noteElement.textContent = note;
+                
+                // Get the note name for display
+                const frequencies = getFrequenciesForKey(noteObj.key);
+                const notes = Object.keys(frequencies);
+                const noteName = notes[noteObj.order];
+                
+                noteElement.textContent = noteName;
+                container.appendChild(noteElement);
+
+                // Optionally add a tooltip showing the key
+                noteElement.title = `Note: ${noteName} (Key: ${noteObj.key})`;
+                
                 container.appendChild(noteElement);
             });
         }
-
-
-        function clearSavedNotes() {
-            savedNotes = [];
-            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
-            displaySavedNotes();
-        }
-
+        
         function playSequence() {
             const button = document.querySelector('.play-button');
             
@@ -398,10 +607,10 @@
                 isPlaying = false;
                 button.textContent = 'Play Sequence';
                 button.style.backgroundColor = '#4CAF50';
-
+        
                 // Optionally suspend the audio context when stopping
-                if (sharedAudioContext) {
-                    sharedAudioContext.suspend();
+                if (noteAudioContext) {
+                    noteAudioContext.suspend();
                 }
                 return;
             }
@@ -416,7 +625,7 @@
             isPlaying = true;
             button.textContent = 'Stop Sequence';
             button.style.backgroundColor = '#ff6b6b';
-
+        
             // Generate random jazz-inspired durations
             function generateJazzDurations(count) {
                 const durations = [];
@@ -427,27 +636,31 @@
                 }
                 return durations;
             }
-
-            const rhythmPattern = generateJazzDurations(savedNotes.length); // Random jazz durations
-
-
+        
+            const rhythmPattern = generateJazzDurations(savedNotes.length);
             let currentIndex = 0;
-            const availableChords = Object.keys(eminorChords); // Extract keys from eminorChords
-
+        
             async function playNotesWithRhythm() {
                 if (!isPlaying) return;
-
+        
                 const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
+                const noteObj = savedNotes[currentIndex];
                 
-                // Play the melody note
-                playNote(savedNotes[currentIndex], false, duration);
+                // Play the melody note using the stored order and key
+                playNote(noteObj.order, duration);
                 
-                // Play a random chord with reduced volume
-                const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
-                const chordNotes = eminorChords[randomChordName];
-                chordNotes.forEach(note => {
-                    playNote(note, true, duration);
-                });
+                // Get chords for the note's original key
+                const currentChords = musicalScales[noteObj.key].chords;
+                const availableChords = Object.keys(currentChords);
+        
+                // Play a random chord
+                if (availableChords.length > 0) {
+                    const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
+                    const chordNotes = currentChords[randomChordName];
+                    
+                    // Play the chord using playChords
+                    playChords(chordNotes, duration);
+                }
                 
                 await new Promise(resolve => setTimeout(resolve, duration * 1000));
                 
@@ -457,11 +670,193 @@
                     playNotesWithRhythm();
                 }
             }
-
-
+        
             // Start the sequence
             playNotesWithRhythm();
         }
+        
+
+        function clearSavedNotes() {
+            savedNotes = [];
+            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+            displaySavedNotes();
+        }
+
+        
+        // download
+        async function downloadSequence() {
+            if (savedNotes.length === 0) {
+                alert('No notes to download! Please add some notes first.');
+                return;
+            }
+        
+            const sampleRate = 44100;
+            const channels = 1; // Changed to mono for simplicity
+            const kbps = 128;
+        
+            // Create offline context
+            const offlineContext = new OfflineAudioContext(
+                channels,
+                sampleRate * 20, // 20 seconds
+                sampleRate
+            );
+        
+            const destination = offlineContext.destination;
+            let currentTime = 0;
+            let currentIndex = 0;
+        
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.textContent = 'Generating MP3...';
+            loadingDiv.style.position = 'fixed';
+            loadingDiv.style.top = '50%';
+            loadingDiv.style.left = '50%';
+            loadingDiv.style.transform = 'translate(-50%, -50%)';
+            loadingDiv.style.padding = '20px';
+            loadingDiv.style.background = 'rgba(0,0,0,0.8)';
+            loadingDiv.style.color = 'white';
+            loadingDiv.style.borderRadius = '10px';
+            document.body.appendChild(loadingDiv);
+        
+            function generateJazzDurations(count) {
+                const durations = [];
+                for (let i = 0; i < count; i++) {
+                    const swing = Math.random() > 0.8 ? 0.96 : 0.64;
+                    const base = Math.random() * 0.64 + 0.64;
+                    durations.push(base * swing);
+                }
+                return durations;
+            }
+        
+            const rhythmPattern = generateJazzDurations(savedNotes.length);
+            const totalDuration = 20;
+        
+            while (currentTime < totalDuration) {
+                const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
+                const noteObj = savedNotes[currentIndex];
+                
+                const frequencies = musicalScales[noteObj.key].frequencies;
+                const notes = Object.keys(frequencies);
+                const noteName = notes[noteObj.order];
+                
+                if (noteName) {
+                    // Create oscillator for melody
+                    const oscillator = offlineContext.createOscillator();
+                    const gainNode = offlineContext.createGain();
+        
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(
+                        frequencies[noteName], 
+                        currentTime
+                    );
+        
+                    const initialGain = 0.2;
+                    gainNode.gain.setValueAtTime(initialGain, currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(
+                        0.01, 
+                        currentTime + duration
+                    );
+        
+                    oscillator.connect(gainNode);
+                    gainNode.connect(destination);
+        
+                    // Play chord
+                    const currentChords = musicalScales[noteObj.key].chords;
+                    const availableChords = Object.keys(currentChords);
+                    
+                    if (availableChords.length > 0) {
+                        const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
+                        const chordNotes = currentChords[randomChordName];
+                        
+                        if (Array.isArray(chordNotes)) {
+                            chordNotes.forEach(chordNote => {
+                                if (frequencies[chordNote]) {
+                                    const chordOsc = offlineContext.createOscillator();
+                                    const chordGain = offlineContext.createGain();
+        
+                                    chordOsc.type = 'sine';
+                                    chordOsc.frequency.setValueAtTime(
+                                        frequencies[chordNote], 
+                                        currentTime
+                                    );
+        
+                                    const chordGainValue = 0.05;
+                                    chordGain.gain.setValueAtTime(chordGainValue, currentTime);
+                                    chordGain.gain.exponentialRampToValueAtTime(
+                                        0.01, 
+                                        currentTime + duration
+                                    );
+        
+                                    chordOsc.connect(chordGain);
+                                    chordGain.connect(destination);
+        
+                                    chordOsc.start(currentTime);
+                                    chordOsc.stop(currentTime + duration);
+                                }
+                            });
+                        }
+                    }
+        
+                    oscillator.start(currentTime);
+                    oscillator.stop(currentTime + duration);
+                }
+                
+                currentTime += duration;
+                currentIndex = (currentIndex + 1) % savedNotes.length;
+            }
+        
+            try {
+                // Render the audio
+                const renderedBuffer = await offlineContext.startRendering();
+                
+                // Create MP3 encoder
+                const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
+                const mp3Data = [];
+        
+                // Convert Float32Array to Int16Array
+                const samples = new Int16Array(renderedBuffer.length);
+                const leftChannel = renderedBuffer.getChannelData(0);
+                
+                // Convert and clip samples
+                for (let i = 0; i < renderedBuffer.length; i++) {
+                    // Convert float32 to int16
+                    const sample = Math.max(-1, Math.min(1, leftChannel[i]));
+                    samples[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                }
+        
+                // Encode to MP3 in chunks
+                const mp3ChunkSize = 1152; // Must be multiple of 576
+                for (let i = 0; i < samples.length; i += mp3ChunkSize) {
+                    const sampleChunk = samples.subarray(i, i + mp3ChunkSize);
+                    const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                    if (mp3buf.length > 0) {
+                        mp3Data.push(new Int8Array(mp3buf));
+                    }
+                }
+        
+                // Finish encoding
+                const mp3buf = mp3encoder.flush();
+                if (mp3buf.length > 0) {
+                    mp3Data.push(new Int8Array(mp3buf));
+                }
+        
+                // Create MP3 Blob and download
+                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'sequence.mp3';
+                link.click();
+                URL.revokeObjectURL(url);
+        
+            } catch (error) {
+                console.error('Error generating MP3:', error);
+                alert('Error generating MP3. Please try again.');
+            } finally {
+                document.body.removeChild(loadingDiv);
+            }
+        }
+        
         
     </script>
 </body>

@@ -156,7 +156,20 @@
             background-color: #4CAF50;
             color: white;
         }
-        
+
+        .download-button {
+        background-color: #4CAF50;
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 4px;
+        }
         
         
     </style>
@@ -232,6 +245,8 @@
         </div>
     </div>
 
+    <button onclick="downloadSequence()" class="download-button">Download Sequence</button>
+    <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"></script>
     <script>
         // Initialize saved notes from localStorage or empty array if none exists
         let savedNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
@@ -667,8 +682,182 @@
             displaySavedNotes();
         }
 
-
-
+        
+        // download
+        async function downloadSequence() {
+            if (savedNotes.length === 0) {
+                alert('No notes to download! Please add some notes first.');
+                return;
+            }
+        
+            const sampleRate = 44100;
+            const channels = 1; // Changed to mono for simplicity
+            const kbps = 128;
+        
+            // Create offline context
+            const offlineContext = new OfflineAudioContext(
+                channels,
+                sampleRate * 20, // 20 seconds
+                sampleRate
+            );
+        
+            const destination = offlineContext.destination;
+            let currentTime = 0;
+            let currentIndex = 0;
+        
+            // Show loading indicator
+            const loadingDiv = document.createElement('div');
+            loadingDiv.textContent = 'Generating MP3...';
+            loadingDiv.style.position = 'fixed';
+            loadingDiv.style.top = '50%';
+            loadingDiv.style.left = '50%';
+            loadingDiv.style.transform = 'translate(-50%, -50%)';
+            loadingDiv.style.padding = '20px';
+            loadingDiv.style.background = 'rgba(0,0,0,0.8)';
+            loadingDiv.style.color = 'white';
+            loadingDiv.style.borderRadius = '10px';
+            document.body.appendChild(loadingDiv);
+        
+            function generateJazzDurations(count) {
+                const durations = [];
+                for (let i = 0; i < count; i++) {
+                    const swing = Math.random() > 0.8 ? 0.96 : 0.64;
+                    const base = Math.random() * 0.64 + 0.64;
+                    durations.push(base * swing);
+                }
+                return durations;
+            }
+        
+            const rhythmPattern = generateJazzDurations(savedNotes.length);
+            const totalDuration = 20;
+        
+            while (currentTime < totalDuration) {
+                const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
+                const noteObj = savedNotes[currentIndex];
+                
+                const frequencies = musicalScales[noteObj.key].frequencies;
+                const notes = Object.keys(frequencies);
+                const noteName = notes[noteObj.order];
+                
+                if (noteName) {
+                    // Create oscillator for melody
+                    const oscillator = offlineContext.createOscillator();
+                    const gainNode = offlineContext.createGain();
+        
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(
+                        frequencies[noteName], 
+                        currentTime
+                    );
+        
+                    const initialGain = 0.2;
+                    gainNode.gain.setValueAtTime(initialGain, currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(
+                        0.01, 
+                        currentTime + duration
+                    );
+        
+                    oscillator.connect(gainNode);
+                    gainNode.connect(destination);
+        
+                    // Play chord
+                    const currentChords = musicalScales[noteObj.key].chords;
+                    const availableChords = Object.keys(currentChords);
+                    
+                    if (availableChords.length > 0) {
+                        const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
+                        const chordNotes = currentChords[randomChordName];
+                        
+                        if (Array.isArray(chordNotes)) {
+                            chordNotes.forEach(chordNote => {
+                                if (frequencies[chordNote]) {
+                                    const chordOsc = offlineContext.createOscillator();
+                                    const chordGain = offlineContext.createGain();
+        
+                                    chordOsc.type = 'sine';
+                                    chordOsc.frequency.setValueAtTime(
+                                        frequencies[chordNote], 
+                                        currentTime
+                                    );
+        
+                                    const chordGainValue = 0.05;
+                                    chordGain.gain.setValueAtTime(chordGainValue, currentTime);
+                                    chordGain.gain.exponentialRampToValueAtTime(
+                                        0.01, 
+                                        currentTime + duration
+                                    );
+        
+                                    chordOsc.connect(chordGain);
+                                    chordGain.connect(destination);
+        
+                                    chordOsc.start(currentTime);
+                                    chordOsc.stop(currentTime + duration);
+                                }
+                            });
+                        }
+                    }
+        
+                    oscillator.start(currentTime);
+                    oscillator.stop(currentTime + duration);
+                }
+                
+                currentTime += duration;
+                currentIndex = (currentIndex + 1) % savedNotes.length;
+            }
+        
+            try {
+                // Render the audio
+                const renderedBuffer = await offlineContext.startRendering();
+                
+                // Create MP3 encoder
+                const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
+                const mp3Data = [];
+        
+                // Convert Float32Array to Int16Array
+                const samples = new Int16Array(renderedBuffer.length);
+                const leftChannel = renderedBuffer.getChannelData(0);
+                
+                // Convert and clip samples
+                for (let i = 0; i < renderedBuffer.length; i++) {
+                    // Convert float32 to int16
+                    const sample = Math.max(-1, Math.min(1, leftChannel[i]));
+                    samples[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                }
+        
+                // Encode to MP3 in chunks
+                const mp3ChunkSize = 1152; // Must be multiple of 576
+                for (let i = 0; i < samples.length; i += mp3ChunkSize) {
+                    const sampleChunk = samples.subarray(i, i + mp3ChunkSize);
+                    const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
+                    if (mp3buf.length > 0) {
+                        mp3Data.push(new Int8Array(mp3buf));
+                    }
+                }
+        
+                // Finish encoding
+                const mp3buf = mp3encoder.flush();
+                if (mp3buf.length > 0) {
+                    mp3Data.push(new Int8Array(mp3buf));
+                }
+        
+                // Create MP3 Blob and download
+                const blob = new Blob(mp3Data, { type: 'audio/mp3' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'sequence.mp3';
+                link.click();
+                URL.revokeObjectURL(url);
+        
+            } catch (error) {
+                console.error('Error generating MP3:', error);
+                alert('Error generating MP3. Please try again.');
+            } finally {
+                document.body.removeChild(loadingDiv);
+            }
+        }
+        
+        
     </script>
 </body>
 </html>

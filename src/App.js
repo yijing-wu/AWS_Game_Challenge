@@ -4,6 +4,8 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import { playSequence } from "./music"; 
+import InputOverlay from "./components/Interface/InputOverlay";
+import Paper from "./components/models/Paper";
 
 function App() {
   const [hitCount, setHitCount] = useState(0);
@@ -11,10 +13,39 @@ function App() {
   const [gameStarted, setGameStarted] = useState(false);
   const [lastNote, setLastNote] = useState(""); // 用来保存最后点击的音符名字
 
+  const [isFloating, setIsFloating] = useState(false);
+  const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const [text, setText] = useState("");
+
+  const [formData, setFormData] = useState({
+    receiver: '',
+    relationship: '',
+    holiday: '',
+    additional_info: '',
+    tone: '',
+    sender: ''
+  });
+
   const startGame = () => {
     setHitCount(0);
     setGameOver(false);
     setGameStarted(true);
+  };
+
+  const handlePaperClick = () => setIsFloating(true);
+  const handleSubmit = () => {
+    console.log("Submitted Text:", text);
+    console.log("Submitted Form Data:", formData);
+    setIsFloating(false); // Hide overlay and reset
+    setText(""); // Clear input
+    setFormData({
+      name: '',
+      relationship: '',
+      holiday: '',
+      additional_info: '',
+      tone: '',
+      sender: ''
+    });
   };
 
   useEffect(() => {
@@ -37,8 +68,19 @@ function App() {
     <div style={{ height: "100vh", position: "relative" }}>
       <Canvas shadows>
         <DeskScene onComputerClick={startGame} />
+        <Paper onPointerDown={handlePaperClick} />
         {gameStarted && <NoteGame hitCount={hitCount} setHitCount={setHitCount} onNoteClick={handleNoteClick} />}
-        <OrbitControls />
+        <OrbitControls 
+          enablePan={false}      // Disable panning
+          enableZoom={false}     // Disable zooming
+          enableRotate={false}   // Disable rotation
+        />
+        <InputOverlay
+          isFloating={isFloating}
+          text={formData}
+          setText={setFormData}
+          handleSubmit={handleSubmit}
+        />
       </Canvas>
       
       <div

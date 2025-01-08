@@ -3,44 +3,60 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
-import { playSequence } from "./music"; 
+import FilterSwitcher from "./FilterSwitcher";
+import { playSequence } from "./music";
 
 function App() {
   const [hitCount, setHitCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [lastNote, setLastNote] = useState(""); // 用来保存最后点击的音符名字
+  const [lastNote, setLastNote] = useState(""); // State for last played note
+  const [showFilterSwitcher, setShowFilterSwitcher] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false); 
 
   const startGame = () => {
-    setHitCount(0);
-    setGameOver(false);
     setGameStarted(true);
+    setGameOver(false);
+    setHitCount(0);
+    setLastNote("");
+    setShowFilterSwitcher(false);
   };
 
   useEffect(() => {
-    if (hitCount >= 10) {
+    if (hitCount >= 5) {
       setGameOver(true);
       setGameStarted(false);
     }
   }, [hitCount]);
 
-  // 处理点击事件，记录音符名字
-  const handleNoteClick = (note) => {
-    setLastNote(note);
+  const handleBooksClick = () => {
+    if (gameOver) {
+      setShowFilterSwitcher(true);
+    }
   };
 
   const handlePlaySequence = () => {
-    playSequence(); // 调用 playSequence 函数播放音符序列
+    setIsPlaying((prev) => !prev);
+    playSequence();
   };
 
   return (
     <div style={{ height: "100vh", position: "relative" }}>
       <Canvas shadows>
-        <DeskScene onComputerClick={startGame} />
-        {gameStarted && <NoteGame hitCount={hitCount} setHitCount={setHitCount} onNoteClick={handleNoteClick} />}
+        <DeskScene
+          onComputerClick={startGame}
+          onBooksClick={handleBooksClick}
+        />
+        {gameStarted && (
+          <NoteGame
+            hitCount={hitCount}
+            setHitCount={setHitCount}
+            setLastNote={setLastNote} // Pass setLastNote
+          />
+        )}
         <OrbitControls />
       </Canvas>
-      
+
       <div
         style={{
           position: "absolute",
@@ -51,16 +67,23 @@ function App() {
         }}
       >
         <div>Hit Count: {hitCount}</div>
-        <div>Last Note: {lastNote}</div> {/* 显示最后点击的音符名字 */}
+        <div>Last Note: {lastNote}</div> {/* Display the last note */}
         {gameOver && (
           <div style={{ marginTop: "20px" }}>
-            Game Over! 
+            Game Over!
             <button onClick={startGame}>Restart</button>
-            <button onClick={handlePlaySequence} style={{ marginLeft: "10px" }}>
-              Play Sequence
-            </button>
+            <button
+        className="play-button"
+        onClick={handlePlaySequence}
+        style={{
+          backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
+        }}
+      >
+        {isPlaying ? 'Stop Sequence' : 'Play Sequence'}
+      </button>
           </div>
         )}
+        {showFilterSwitcher && <FilterSwitcher />}
       </div>
     </div>
   );

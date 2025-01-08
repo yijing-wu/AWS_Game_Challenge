@@ -11,6 +11,7 @@ logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
+    print(event)
     ## Configuration
     region = "us-east-1"
     # Model: choose one of the following models to use

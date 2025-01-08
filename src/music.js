@@ -391,7 +391,7 @@
                 
                 currentIndex = (currentIndex + 1) % savedNotes.length;
                 
-                if (isPlaying) {``
+                if (isPlaying) {
                     playNotesWithRhythm();
                 }
             }

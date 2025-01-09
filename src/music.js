@@ -282,8 +282,8 @@
         
           savedNotes.push(noteObject);
         
-          if (savedNotes.length > 5) {
-            savedNotes = savedNotes.slice(-5); // Keep only the last 5 notes
+          if (savedNotes.length > 10) {
+            savedNotes = savedNotes.slice(-10); // Keep only the last 10 notes
           }
         
           localStorage.setItem("savedNotes", JSON.stringify(savedNotes));
@@ -380,7 +380,7 @@
         
                 // Play a random chord
                 if (availableChords.length > 0) {
-                    const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
+                    const randomChordName = availableChords[noteObj.order];
                     const chordNotes = currentChords[randomChordName];
                     
                     // Play the chord using playChords

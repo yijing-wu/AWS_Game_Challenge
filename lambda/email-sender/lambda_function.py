@@ -1,15 +1,22 @@
 import boto3
 import json
+import logging
+
+# Set up logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
+
+    logger.info(f"Received event: {event}")
 
     ses_client = boto3.client("ses", region_name="us-east-1")
 
     # phrase event body
     body = json.loads(event["body"])
     to_email = body["to"]
-    subject = "Holiday Card"
+    subject = "Your Digital Card Delivery!"
     html_body = body["html_body"]
 
     sender = "support@makedigitalcards.xyz"

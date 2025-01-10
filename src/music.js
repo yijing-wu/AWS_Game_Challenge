@@ -5,10 +5,12 @@
         let currentKey = 'eMinor';
         let frequencies = {};
         let chords = {};
+        let bgmPlaying = false;
         
         // Separate audio contexts for notes and chords
         let noteAudioContext = null;
         let chordAudioContext = null;
+        let bgmAudioContext = null;
         
         const musicalScales = {
             eMinor: {
@@ -139,6 +141,24 @@
             return chordAudioContext;
         }
 
+        function getBgmAudioContext() {
+            if (!bgmAudioContext) {
+                bgmAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return bgmAudioContext;
+        }
+
+        // Generate random jazz-inspired durations
+        function generateJazzDurations(count) {
+            const durations = [];
+            for (let i = 0; i < count; i++) {
+                const swing = Math.random() > 0.8 ? 0.96 : 0.64; // Swing feel (60-40% ratio)
+                const base = Math.random() * 0.64 + 0.64; // Base duration between 0.4s and 0.8s
+                durations.push(base * swing); // Apply swing factor
+            }
+            return durations;
+        }
+
         export function changeKey(newKey) {
             // Update current key
             currentKey = newKey;
@@ -183,14 +203,14 @@
             return musicalScales[key].chords;
         }
 
-        export function playNote(order, duration = 0.5) {
+        export function playNote(order, duration = 0.5, audioContext=getNoteAudioContext(), initialGain=0.5) {
 
             if (typeof order !== 'number' || isNaN(order)) {
               console.error('Invalid order parameter:', order);
               return;
             }
           
-            const audioContext = getNoteAudioContext();
+            // const audioContext = getNoteAudioContext();
           
             if (audioContext.state === 'suspended') {
               audioContext.resume().catch((err) => console.error('Failed to resume audio context:', err));
@@ -217,7 +237,7 @@
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
           
-            const initialGain = 0.5;
+            // const initialGain = 0.5;
             gainNode.gain.setValueAtTime(initialGain, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
           
@@ -351,17 +371,6 @@
            // button.textContent = 'Stop Sequence';
             button.style.backgroundColor = '#ff6b6b';
         
-            // Generate random jazz-inspired durations
-            function generateJazzDurations(count) {
-                const durations = [];
-                for (let i = 0; i < count; i++) {
-                    const swing = Math.random() > 0.8 ? 0.96 : 0.64; // Swing feel (60-40% ratio)
-                    const base = Math.random() * 0.64 + 0.64; // Base duration between 0.4s and 0.8s
-                    durations.push(base * swing); // Apply swing factor
-                }
-                return durations;
-            }
-        
             const rhythmPattern = generateJazzDurations(savedNotes.length);
             let currentIndex = 0;
         
@@ -400,7 +409,51 @@
             playNotesWithRhythm();
         }
         
+        
+        export function playBgm() {
+            const sequence = [0, 2, 3, 4, 5, 6, 2, 1, 7, 4, 3, 2, 0, 5, 6, 4, 3, 2, 1];
+            
+            let currentIndex = 0;
+            const pauseDuration = 0;
 
+            // Generate jazz durations for the entire sequence
+            const noteDurations = generateJazzDurations(sequence.length);
+            
+            changeKey('eMinor');
+            bgmPlaying = true;
+            
+            function playNextNote() {
+                if (!bgmPlaying) return;
+        
+                const bgmAudioContext = getBgmAudioContext();
+                if (bgmAudioContext.state === 'suspended') {
+                    bgmAudioContext.resume();
+                }
+                
+                // Use the pre-generated duration for the current note
+                const noteDuration = noteDurations[currentIndex];
+        
+                playNote(sequence[currentIndex], noteDuration, bgmAudioContext, 0.1);
+                currentIndex = (currentIndex + 1) % sequence.length;
+        
+                setTimeout(() => {
+                    if (bgmPlaying) {
+                        playNextNote();
+                    }
+                }, (noteDuration + pauseDuration) * 1000);
+            }
+        
+            playNextNote();
+        }
+        
+        export function stopBgm() {
+            bgmPlaying = false;
+            const bgmAudioContext = getBgmAudioContext();
+            if (bgmAudioContext) {
+                bgmAudioContext.suspend();
+            }
+        }
+        
         
         // download
         // async function downloadSequence() {

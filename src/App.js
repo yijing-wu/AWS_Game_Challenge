@@ -39,7 +39,7 @@ function App() {
   };
 
   useEffect(() => {
-    if (hitCount >= 5) {
+    if (hitCount >= 10) {
       setGameOver(true);
       setGameStarted(false);
     }

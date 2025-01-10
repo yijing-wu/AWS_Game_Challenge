@@ -11,12 +11,11 @@ logger.setLevel(logging.INFO)
 
 
 def lambda_handler(event, context):
-    print(event)
+    logger.info(f"Received event: {event}")
+
     ## Configuration
     region = "us-east-1"
-    # Model: choose one of the following models to use
-    # model_id = "anthropic.claude-3-5-haiku-20241022-v1:0"
-    model_id = "amazon.nova-micro-v1:0"
+    model_id = "anthropic.claude-3-haiku-20240307-v1:0"
     logger.info(f"Using model ID: {model_id}")
 
     # Phrase event body
@@ -35,7 +34,9 @@ Holiday: {body['holiday']}
 Relationship: {body['relationship']}
 Tone: {body['tone']}
 Additional information: {body['additional_info']}
+MusicLink: https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/mistletoe.mp3
 """
+    # TODO: Update the music link
 
     conversation = [
         {"role": "user", "content": [{"text": guidelines}]},
@@ -58,18 +59,20 @@ Additional information: {body['additional_info']}
 
     try:
         client = boto3.client("bedrock-runtime", region_name=region)
-
-        response = client.converse(
-            modelId="anthropic.claude-3-haiku-20240307-v1:0",
-            messages=conversation,
-            inferenceConfig={"maxTokens": 4096, "temperature": 0.2},
-            additionalModelRequestFields={"top_k": 250},
-        )
-        # Extract and print the response text.
-        response_text = response["output"]["message"]["content"][0]["text"]
-        logger.info(response_text)
+        result = []
+        for i in range(2):
+            response = client.converse(
+                modelId=model_id,
+                messages=conversation,
+                inferenceConfig={"maxTokens": 4096, "temperature": 0.3},
+                additionalModelRequestFields={"top_k": 250},
+            )
+            # Extract and print the response text.
+            response_text = response["output"]["message"]["content"][0]["text"]
+            logger.info(f"response {i + 1} generated: {response_text}")
+            result.append(response_text)
     except (ClientError, Exception) as e:
         logger.error(f"ERROR: Can't invoke '{model_id}'. Reason: {e}")
         return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
 
-    return {"statusCode": 200, "body": json.dumps(response_text)}
+    return {"statusCode": 200, "body": json.dumps(result)}

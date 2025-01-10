@@ -10,6 +10,7 @@ guidelines = """You are a thoughtful and creative holiday card writer. Your task
 6. End with an appropriate closing that matches the relationship and tone
 7. Ensure the language is culturally appropriate for the holiday
 8. Use html format for the email body and make it visually appealing
+9. Content and HTML styles should not be the same as the examples 
 
 Format the card with:
 - A greeting line
@@ -24,6 +25,7 @@ Holiday: Christmas
 Relationship: Friend
 Tone: Warm and friendly
 Additional information: None.
+MusicLink: https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/68qzcvq5.mp3
 """
 
 assistant_message_ex1 = """
@@ -70,7 +72,7 @@ assistant_message_ex1 = """
 
             <!-- Music Link -->
             <div style="text-align: center; margin-top: 30px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
-                <a href="https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/mistletoe.mp3" 
+                <a href="https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/68qzcvq5.mp3" 
                    target="_blank" 
                    style="display: inline-block; padding: 12px 25px; background-color: #c41e3a; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; transition: background-color 0.3s ease;">
                     🎵 Click here to listen to a festive tune! 🎶
@@ -96,7 +98,8 @@ From: Your Manager, John
 Holiday: New Year
 Relationship: Manager to team
 Tone: Professional and motivational
-Additional information: The upcoming year is 2025.
+Additional information: The upcoming year is 2025.'
+MusicLink: https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/txa62wqt.mp3
 """
 
 assistant_message_ex2 = """
@@ -140,7 +143,7 @@ assistant_message_ex2 = """
                             <table role="presentation" cellpadding="0" cellspacing="0" style="border-collapse: collapse; margin: 0 auto;">
                                 <tr>
                                     <td style="background-color: #003366; border-radius: 25px; padding: 12px 25px;">
-                                        <a href="https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/mistletoe.mp3" 
+                                        <a href="https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/txa62wqt.mp3" 
                                            target="_blank" 
                                            style="color: #ffffff; text-decoration: none; font-family: Arial, sans-serif; font-size: 16px; font-weight: bold;">
                                             🎵 Listen to Your New Year Music! 🎵
@@ -174,6 +177,7 @@ Holiday: Thanksgiving
 Relationship: Family
 Tone: Loving and grateful
 Additional information: I am planning to visit them for Christmas. I am thankful for their love and support.
+MusicLink: https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/q9d6yhs.mp3
 """
 
 assistant_message_ex3 = """
@@ -228,7 +232,7 @@ assistant_message_ex3 = """
 
             <!-- Thanksgiving Recipe Link -->
             <div style="text-align: center; margin-top: 30px; padding: 15px; background-color: #fffaf0; border-radius: 8px;">
-                <a href="https://www.example.com/thanksgiving-recipe" 
+                <a href="https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/q9d6yhs.mp3" 
                    target="_blank" 
                    style="display: inline-block; padding: 12px 25px; background-color: #d2691e; color: white; text-decoration: none; border-radius: 25px; font-weight: bold; transition: background-color 0.3s ease;">
                     🦃 Check Out your Thanksgiving Music! 🎶

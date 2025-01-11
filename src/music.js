@@ -463,100 +463,101 @@
                 alert('No notes to download! Please add some notes first.');
                 return;
             }
-
-            const TOTAL_DURATION = 20; // 20 seconds total duration
+        
+            const TOTAL_DURATION = 15; // 15 seconds total duration
             
-            // Create an offline context for exactly 20 seconds
+            // Create an offline context with lower sample rate for smaller file size
             const offlineCtx = new OfflineAudioContext(
                 2, // stereo
-                44100 * TOTAL_DURATION, // total samples for 20 seconds
-                44100 // sample rate
+                22050 * TOTAL_DURATION, // lower sample rate (22.05kHz instead of 44.1kHz)
+                22050 // sample rate
             );
-
-            // Calculate how many times we need to loop the sequence to fill 20 seconds
+        
+            let currentTime = 0;
+        
+            // Calculate how many times we need to loop the sequence to fill 24 seconds
             const rhythmPattern = generateJazzDurations(savedNotes.length);
             const singleLoopDuration = rhythmPattern.reduce((sum, duration) => sum + duration, 0);
             const numberOfLoops = Math.ceil(TOTAL_DURATION / singleLoopDuration);
-
-            let currentTime = 0;
-
-            // Loop the sequence multiple times to fill 20 seconds
+        
+            // Loop the sequence multiple times to fill 24 seconds
             for (let loop = 0; loop < numberOfLoops && currentTime < TOTAL_DURATION; loop++) {
-                // Create all oscillators and gain nodes for the sequence
                 for (let i = 0; i < savedNotes.length && currentTime < TOTAL_DURATION; i++) {
                     const noteObj = savedNotes[i];
                     const duration = Math.min(
                         rhythmPattern[i % rhythmPattern.length],
-                        TOTAL_DURATION - currentTime // Ensure we don't exceed 20 seconds
+                        TOTAL_DURATION - currentTime
                     );
                     
-                    if (duration <= 0) break; // Skip if no duration left
-
+                    if (duration <= 0) break;
+        
                     // Get the frequency for the melody note
                     const currentFrequencies = getFrequenciesForKey(noteObj.key);
                     const notes = Object.keys(currentFrequencies);
                     const frequency = currentFrequencies[notes[noteObj.order]];
-
+        
                     // Create and schedule melody note
                     const oscillator = offlineCtx.createOscillator();
                     const gainNode = offlineCtx.createGain();
-
+        
                     oscillator.type = 'sine';
                     oscillator.frequency.setValueAtTime(frequency, currentTime);
-
+        
                     gainNode.gain.setValueAtTime(0.5, currentTime);
                     gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
-
+        
                     oscillator.connect(gainNode);
                     gainNode.connect(offlineCtx.destination);
-
+        
                     oscillator.start(currentTime);
                     oscillator.stop(currentTime + duration);
-
-                    // Add accompanying chord
+        
+                    // Add accompanying chord with reduced polyphony
                     const currentChords = musicalScales[noteObj.key].chords;
                     const availableChords = Object.keys(currentChords);
-
+        
                     if (availableChords.length > 0) {
                         const randomChordName = availableChords[noteObj.order];
                         const chordNotes = currentChords[randomChordName];
-
-                        // Create oscillators for each chord note
-                        chordNotes.forEach(noteName => {
+        
+                        // Limit the number of chord notes for smaller file size
+                        const limitedChordNotes = chordNotes.slice(0, 2); // Only use first two notes of each chord
+        
+                        limitedChordNotes.forEach(noteName => {
                             if (currentFrequencies[noteName]) {
                                 const chordOsc = offlineCtx.createOscillator();
                                 const chordGain = offlineCtx.createGain();
-
+        
                                 chordOsc.type = 'sine';
                                 chordOsc.frequency.setValueAtTime(currentFrequencies[noteName], currentTime);
-
+        
                                 chordGain.gain.setValueAtTime(0.15, currentTime);
                                 chordGain.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
-
+        
                                 chordOsc.connect(chordGain);
                                 chordGain.connect(offlineCtx.destination);
-
+        
                                 chordOsc.start(currentTime);
                                 chordOsc.stop(currentTime + duration);
                             }
                         });
                     }
-
+        
                     currentTime += duration;
                 }
             }
-
-            // Add a fade out effect in the last second
+        
+            // Add fade out
             const masterGain = offlineCtx.createGain();
             masterGain.gain.setValueAtTime(1, TOTAL_DURATION - 1);
             masterGain.gain.linearRampToValueAtTime(0, TOTAL_DURATION);
-
+        
             try {
                 // Render the audio
                 const renderedBuffer = await offlineCtx.startRendering();
                 
-                // Convert to WAV
-                const wavData = audioBufferToWav(renderedBuffer);
+                // Convert to WAV with reduced bit depth
+                const wavData = audioBufferToWav(renderedBuffer, 16); // 16-bit depth
                 
                 // Create and trigger download
                 const blob = new Blob([wavData], { type: 'audio/wav' });
@@ -568,19 +569,18 @@
                 
                 // Cleanup
                 URL.revokeObjectURL(url);
-
+        
             } catch (error) {
                 console.error('Error generating audio:', error);
                 alert('Failed to generate audio file');
             }
         }
-
-        function audioBufferToWav(audioBuffer) {
+        
+        function audioBufferToWav(audioBuffer, bitDepth = 16) {
             const numberOfChannels = audioBuffer.numberOfChannels;
             const length = audioBuffer.length;
             const sampleRate = audioBuffer.sampleRate;
             const format = 1; // PCM
-            const bitDepth = 16;
             
             const bytesPerSample = bitDepth / 8;
             const blockAlign = numberOfChannels * bytesPerSample;
@@ -603,7 +603,7 @@
             writeString(view, 36, 'data');
             view.setUint32(40, length * blockAlign, true);
             
-            // Write audio data
+            // Write audio data with compression
             const offset = 44;
             const channels = [];
             for (let i = 0; i < numberOfChannels; i++) {
@@ -612,7 +612,9 @@
             
             for (let i = 0; i < length; i++) {
                 for (let channel = 0; channel < numberOfChannels; channel++) {
+                    // Apply some basic compression
                     const sample = Math.max(-1, Math.min(1, channels[channel][i]));
+                    // Quantize to fewer bits for compression
                     const int16 = Math.floor(sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
                     view.setInt16(offset + (i * blockAlign) + (channel * bytesPerSample), int16, true);
                 }

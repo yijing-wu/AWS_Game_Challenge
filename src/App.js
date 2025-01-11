@@ -249,26 +249,6 @@ function App() {
               >
                 {isPlaying ? 'Stop Playing' : 'Create your music'}
               </button>
-              <button
-                className="play-button"
-                onClick={handleDownload}
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  fontFamily: "'Pacifico', cursive",
-                  backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                  transition: 'background-color 0.3s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = isPlaying ? '#ff4c4c' : '#45a049'}
-                onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
-              >
-                {'Download'}
-              </button>
             </div>
             
             )}

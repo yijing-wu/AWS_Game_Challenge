@@ -46,12 +46,12 @@ function App() {
     setHitCount(0);
     setLastNote("");
     clearSavedNotes(); // Clear the previously saved notes
-    // stopBgm();
   }
 
   useEffect(() => {
     if (gameState === "notegame" && hitCount >= 10) {
       setGameState("playSequence");
+      handlePlaySequence();
     }
   }, [hitCount, gameState]);
 
@@ -144,6 +144,7 @@ function App() {
               padding: "10px 20px",
               marginTop: "20px",
               color: "white",
+              fontFamily: "'Pacifico', cursive",
               fontSize: "20px",
               cursor: "pointer"
             }}>
@@ -204,24 +205,21 @@ function App() {
               <button 
                 onClick={handleRestartGame} 
                 style={{
-                  padding: '10px 20px', 
-                  fontSize: '16px', 
+                  backgroundColor: "transparent",
+                  border: "2px solid white",
+                  borderRadius: "5px",
+                  padding: "10px 20px",
+                  marginTop: "20px",
+                  color: "white",
                   fontFamily: "'Pacifico', cursive",
-                  backgroundColor: '#4CAF50', 
-                  color: 'white', 
-                  border: 'none', 
-                  borderRadius: '5px', 
-                  cursor: 'pointer', 
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-                  transition: 'background-color 0.3s'
+                  fontSize: "20px",
+                  cursor: "pointer"
                 }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
               >
                 Restart
               </button>
             
-              <button
+              {/* <button
                 className="play-button"
                 onClick={handlePlaySequence}
                 style={{
@@ -240,7 +238,8 @@ function App() {
                 onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
               >
                 {isPlaying ? 'Stop Playing' : 'Create your music'}
-              </button>
+              </button> */}
+
             </div>
             
             )}

@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import FilterSwitcher from "./FilterSwitcher";
-import { playBgm, playSequence , stopBgm ,clearSavedNotes} from "./music";
+import { playBgm, playSequence, stopSequence, stopBgm ,clearSavedNotes} from "./music";
 import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
@@ -29,6 +29,7 @@ function App() {
 
   const startGame = () => {
     setGameState("startgame"); 
+    playBgm();
   };
 
   const handleComputerClick = () => {
@@ -36,6 +37,7 @@ function App() {
       setGameState("notegame");
       setHitCount(0);
       setLastNote("");
+      stopBgm();
     }
   }
 
@@ -43,7 +45,8 @@ function App() {
     setGameState("notegame");
     setHitCount(0);
     setLastNote("");
-    stopBgm();
+    clearSavedNotes(); // Clear the previously saved notes
+    // stopBgm();
   }
 
   useEffect(() => {
@@ -53,19 +56,14 @@ function App() {
   }, [hitCount, gameState]);
 
   const handlePlaySequence = () => {
+    playSequence(); // another click trigger stop
     if (gameState === "playSequence") {
       setIsPlaying((prev) => {
-        const newIsPlaying = !prev;
-        if (newIsPlaying) {
-          playBgm(); 
-        } else {
-          stopBgm();
-        }
-        return newIsPlaying;
+        return !prev;
       });
     }
   };
- 
+
   const handleBooksClick = () => {
     if (gameState === "playSequence") {
       setGameState("selectFilter");

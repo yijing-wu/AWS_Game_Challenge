@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import FilterSwitcher from "./FilterSwitcher";
-import { playSequence } from "./music";
+import { playBgm, playSequence , stopBgm ,clearSavedNotes} from "./music";
 import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
@@ -39,6 +39,13 @@ function App() {
     }
   }
 
+  const handleRestartGame = () =>{
+    setGameState("notegame");
+    setHitCount(0);
+    setLastNote("");
+    stopBgm();
+  }
+
   useEffect(() => {
     if (gameState === "notegame" && hitCount >= 10) {
       setGameState("playSequence");
@@ -47,8 +54,15 @@ function App() {
 
   const handlePlaySequence = () => {
     if (gameState === "playSequence") {
-    setIsPlaying((prev) => !prev);
-    playSequence();
+      setIsPlaying((prev) => {
+        const newIsPlaying = !prev;
+        if (newIsPlaying) {
+          playBgm(); 
+        } else {
+          stopBgm();
+        }
+        return newIsPlaying;
+      });
     }
   };
  
@@ -107,8 +121,8 @@ function App() {
           position: "absolute",
           top: "0",
           left: "0",
-          width: "50%",
-          height: "50%",
+          width: "100%",
+          height: "100%",
           backgroundColor: "#000",
           backgroundImage: "url('https://darksky.org/app/uploads/2020/03/hero-Night-Sky-Family-Activities.jpg')",
           backgroundSize: "cover",
@@ -119,7 +133,8 @@ function App() {
           fontFamily: "'Pacifico', cursive",
           fontSize: "50px",
           flexDirection: "column",
-          textAlign: "center"
+          textAlign: "center",
+          zIndex: gameState === "idle" ? 2 : 1, 
         }}>
           <div>Welcome to the Game!</div>
           <button 
@@ -138,10 +153,10 @@ function App() {
           </button>
         </div>
       )}
-
+  
       {/* Game Content */}
       {gameState !== "idle" && (
-        <div>
+        <div style={{ height: "100vh", position: "relative" }}>
           <Canvas shadows>
             <DeskScene onComputerClick={handleComputerClick} onBooksClick={handleBooksClick} />
             {gameState === "notegame" && (
@@ -162,41 +177,80 @@ function App() {
               />
             )}
           </Canvas>
-
+  
           <div
             style={{
               position: "absolute",
-              top: "50px",
-              left: "50px",
+              top: "10px",
+              left: "10px",
               color: "white",
               fontSize: "20px",
+              fontFamily: "'Pacifico', cursive",
+              zIndex: 1, 
             }}
           >
             {gameState === "notegame" && (
               <>
-                <div>Hit Count: {hitCount}</div>
-                <div>Last Note: {lastNote}</div>
+                <div>You need to click {10-hitCount} more 🎵 to create your own sequence</div>
+                <div>The ball you received is {lastNote} note</div>
               </>
             )}
             {gameState === "playSequence" && (
-              <div style={{ marginTop: "20px" }}>
-                <button onClick={startGame}>Restart</button>
-                <button
-                  className="play-button"
-                  onClick={handlePlaySequence}
-                  style={{
-                    backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
-                  }}
-                >
-                  {isPlaying ? 'Stop Sequence' : 'Play Sequence'}
-                </button>
-              </div>
+             <div style={{
+              marginTop: "20px", 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              gap: '15px'
+            }}>
+              <button 
+                onClick={handleRestartGame} 
+                style={{
+                  padding: '10px 20px', 
+                  fontSize: '16px', 
+                  fontFamily: "'Pacifico', cursive",
+                  backgroundColor: '#4CAF50', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '5px', 
+                  cursor: 'pointer', 
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
+                  transition: 'background-color 0.3s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+              >
+                Restart
+              </button>
+            
+              <button
+                className="play-button"
+                onClick={handlePlaySequence}
+                style={{
+                  padding: '10px 20px',
+                  fontSize: '16px',
+                  fontFamily: "'Pacifico', cursive",
+                  backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'background-color 0.3s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = isPlaying ? '#ff4c4c' : '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
+              >
+                {isPlaying ? 'Stop Playing' : 'Create your music'}
+              </button>
+            </div>
+            
             )}
             {gameState === "selectFilter" && (
               <FilterSwitcher onConfirm={handleFilterConfirmed} />
             )}
           </div>
-
+  
           <ResponseDisplay 
             htmlContents={htmlContents}
             isLoading={isLoading}
@@ -205,7 +259,7 @@ function App() {
         </div>
       )}
     </div>
-  );
+  );  
 }
 
 export default App;

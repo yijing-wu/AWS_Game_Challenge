@@ -41,7 +41,22 @@ const FilterSwitcher = ({ onConfirm }) => {
       <button className="arrow right" onClick={() => handleArrowClick('right')}>
         →
       </button>
-      <button className="confirm-button" onClick={handleConfirmClick}>
+      <button className="confirm-button" onClick={handleConfirmClick}
+      style={{
+        padding: '10px 20px', 
+        fontSize: '16px', 
+        fontFamily: "'Pacifico', cursive",
+        backgroundColor: '#4CAF50', 
+        color: 'white', 
+        border: 'none', 
+        borderRadius: '5px', 
+        cursor: 'pointer', 
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
+        transition: 'background-color 0.3s'
+      }}
+      onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+      onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+      >
         Confirm
       </button>
     </div>

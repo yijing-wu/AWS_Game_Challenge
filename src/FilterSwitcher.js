@@ -19,7 +19,7 @@ const FilterSwitcher = ({ onConfirm }) => {
     changeKey(keys[newIndex]); // Call changeKey to update the key
   };
 
-  // Update the background color based on the current index
+  // Update the background color and note color based on the current index
   useEffect(() => {
     document.body.style.background = colors[currentIndex];
   }, [currentIndex]);
@@ -31,33 +31,28 @@ const FilterSwitcher = ({ onConfirm }) => {
 
   return (
     <div className="filter-switcher">
-      <button className="arrow left" onClick={() => handleArrowClick('left')}>
-        ←
-      </button>
-      <div className="current-key">
-        <div className="note-animation">♪</div>
-        <span id="currentKeyDisplay">{keys[currentIndex].replace(/([A-Z])/g, ' $1')}</span>
+      <div className="controls">
+        <button className="arrow left" onClick={() => handleArrowClick('left')}>
+          ←
+        </button>
+        <div className="current-key">
+          <div
+            className="note-animation"
+            style={{ color: colors[currentIndex] }} 
+          >
+            ♪
+          </div>
+          <span id="currentKeyDisplay">{keys[currentIndex].replace(/([A-Z])/g, ' $1')}</span>
+        </div>
+        <button className="arrow right" onClick={() => handleArrowClick('right')}>
+          →
+        </button>
       </div>
-      <button className="arrow right" onClick={() => handleArrowClick('right')}>
-        →
-      </button>
-      <button className="confirm-button" onClick={handleConfirmClick}
-      style={{
-        padding: '10px 20px', 
-        fontSize: '16px', 
-        fontFamily: "'Pacifico', cursive",
-        backgroundColor: '#4CAF50', 
-        color: 'white', 
-        border: 'none', 
-        borderRadius: '5px', 
-        cursor: 'pointer', 
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-        transition: 'background-color 0.3s'
-      }}
-      onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-      onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+      <button
+        className="confirm-button"
+        onClick={handleConfirmClick}
       >
-        Confirm
+        Confirm your key
       </button>
     </div>
   );

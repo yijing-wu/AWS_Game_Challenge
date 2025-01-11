@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import './FilterSwitcher.css';
 import { changeKey } from './music';
 
-const FilterSwitcher = () => {
+const FilterSwitcher = ({ onConfirm }) => {
   const keys = ['eMinor', 'gMajor', 'dMajor', 'bMajor', 'aMinor'];
   const colors = ['#ff9a9e', '#fad0c4', '#a1c4fd', '#c2e9fb', '#d4fc79'];
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Handle arrow navigation
   const handleArrowClick = (direction) => {
     let newIndex = currentIndex;
     if (direction === 'left') {
@@ -15,12 +16,18 @@ const FilterSwitcher = () => {
       newIndex = (currentIndex + 1) % keys.length;
     }
     setCurrentIndex(newIndex);
-    changeKey(keys[newIndex]);
+    changeKey(keys[newIndex]); // Call changeKey to update the key
   };
 
+  // Update the background color based on the current index
   useEffect(() => {
-    document.body.style.background = colors[currentIndex]; 
+    document.body.style.background = colors[currentIndex];
   }, [currentIndex]);
+
+  // Handle "Confirm" button click
+  const handleConfirmClick = () => {
+    onConfirm(keys[currentIndex]); // Pass the selected key back to App
+  };
 
   return (
     <div className="filter-switcher">
@@ -33,6 +40,9 @@ const FilterSwitcher = () => {
       </div>
       <button className="arrow right" onClick={() => handleArrowClick('right')}>
         →
+      </button>
+      <button className="confirm-button" onClick={handleConfirmClick}>
+        Confirm
       </button>
     </div>
   );

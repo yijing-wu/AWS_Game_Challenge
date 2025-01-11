@@ -24,7 +24,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
         {
           id: Date.now(),
           type: randomType,
-          order: notes.indexOf(randomType), // Save order for playNote
+          order: notes.indexOf(randomType), 
           position: [Math.random() - 0.5, 1, 4.4],
           speed: Math.random() * 0.001 + 0.005,
           color: `hsl(${Math.random() * 360}, 100%, 50%)`,
@@ -52,9 +52,9 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
 
   const handleClick = (id, type, order) => {
     setHitCount((count) => count + 1);
-    setLastNote(type); // Update last note
-    playNote(order); // Play the note
-    saveNote(order); // Save the note
+    setLastNote(type); 
+    playNote(order); 
+    saveNote(order); 
 
     setGameObjects((prev) => prev.filter((obj) => obj.id !== id));
   };

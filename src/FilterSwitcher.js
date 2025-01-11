@@ -38,7 +38,7 @@ const FilterSwitcher = ({ onConfirm }) => {
         <div className="current-key">
           <div
             className="note-animation"
-            style={{ color: colors[currentIndex] }} // Change note color dynamically
+            style={{ color: colors[currentIndex] }} 
           >
             ♪
           </div>

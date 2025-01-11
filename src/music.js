@@ -1,4 +1,5 @@
-        // Initialize saved notes from localStorage or empty array if none exists
+
+// Initialize saved notes from localStorage or empty array if none exists
         let savedNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
         let isPlaying = false;
         let playingInterval;
@@ -170,7 +171,6 @@
             const displayText = newKey.replace(/([A-Z])/g, ' $1').trim()
                                      .replace('Minor', ' Minor')
                                      .replace('Major', ' Major');
-           // document.getElementById('currentKeyDisplay').textContent = displayText;
 
             // Update button styles
             document.querySelectorAll('.key-button').forEach(button => {
@@ -349,8 +349,6 @@
 
             // Start playing
             isPlaying = true;
-           // button.textContent = 'Stop Sequence';
-            // button.style.backgroundColor = '#ff6b6b';
 
             const rhythmPattern = generateJazzDurations(savedNotes.length);
             let currentIndex = 0;
@@ -460,175 +458,172 @@
 
 
         // download
-        // async function downloadSequence() {
-        //     if (savedNotes.length === 0) {
-        //         alert('No notes to download! Please add some notes first.');
-        //         return;
-        //     }
-        
-        //     const sampleRate = 44100;
-        //     const channels = 1; // Changed to mono for simplicity
-        //     const kbps = 128;
-        
-        //     // Create offline context
-        //     const offlineContext = new OfflineAudioContext(
-        //         channels,
-        //         sampleRate * 20, // 20 seconds
-        //         sampleRate
-        //     );
-        
-        //     const destination = offlineContext.destination;
-        //     let currentTime = 0;
-        //     let currentIndex = 0;
-        
-        //     // Show loading indicator
-        //     const loadingDiv = document.createElement('div');
-        //     loadingDiv.textContent = 'Generating MP3...';
-        //     loadingDiv.style.position = 'fixed';
-        //     loadingDiv.style.top = '50%';
-        //     loadingDiv.style.left = '50%';
-        //     loadingDiv.style.transform = 'translate(-50%, -50%)';
-        //     loadingDiv.style.padding = '20px';
-        //     loadingDiv.style.background = 'rgba(0,0,0,0.8)';
-        //     loadingDiv.style.color = 'white';
-        //     loadingDiv.style.borderRadius = '10px';
-        //     document.body.appendChild(loadingDiv);
-        
-        //     function generateJazzDurations(count) {
-        //         const durations = [];
-        //         for (let i = 0; i < count; i++) {
-        //             const swing = Math.random() > 0.8 ? 0.96 : 0.64;
-        //             const base = Math.random() * 0.64 + 0.64;
-        //             durations.push(base * swing);
-        //         }
-        //         return durations;
-        //     }
-        
-        //     const rhythmPattern = generateJazzDurations(savedNotes.length);
-        //     const totalDuration = 20;
-        
-        //     while (currentTime < totalDuration) {
-        //         const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
-        //         const noteObj = savedNotes[currentIndex];
-                
-        //         const frequencies = musicalScales[noteObj.key].frequencies;
-        //         const notes = Object.keys(frequencies);
-        //         const noteName = notes[noteObj.order];
-                
-        //         if (noteName) {
-        //             // Create oscillator for melody
-        //             const oscillator = offlineContext.createOscillator();
-        //             const gainNode = offlineContext.createGain();
-        
-        //             oscillator.type = 'sine';
-        //             oscillator.frequency.setValueAtTime(
-        //                 frequencies[noteName], 
-        //                 currentTime
-        //             );
-        
-        //             const initialGain = 0.2;
-        //             gainNode.gain.setValueAtTime(initialGain, currentTime);
-        //             gainNode.gain.exponentialRampToValueAtTime(
-        //                 0.01, 
-        //                 currentTime + duration
-        //             );
-        
-        //             oscillator.connect(gainNode);
-        //             gainNode.connect(destination);
-        
-        //             // Play chord
-        //             const currentChords = musicalScales[noteObj.key].chords;
-        //             const availableChords = Object.keys(currentChords);
+        export async function downloadSequence(fileName = 'melody.wav') {
+            if (savedNotes.length === 0) {
+                alert('No notes to download! Please add some notes first.');
+                return;
+            }
+
+            const TOTAL_DURATION = 20; // 20 seconds total duration
+            
+            // Create an offline context for exactly 20 seconds
+            const offlineCtx = new OfflineAudioContext(
+                2, // stereo
+                44100 * TOTAL_DURATION, // total samples for 20 seconds
+                44100 // sample rate
+            );
+
+            // Calculate how many times we need to loop the sequence to fill 20 seconds
+            const rhythmPattern = generateJazzDurations(savedNotes.length);
+            const singleLoopDuration = rhythmPattern.reduce((sum, duration) => sum + duration, 0);
+            const numberOfLoops = Math.ceil(TOTAL_DURATION / singleLoopDuration);
+
+            let currentTime = 0;
+
+            // Loop the sequence multiple times to fill 20 seconds
+            for (let loop = 0; loop < numberOfLoops && currentTime < TOTAL_DURATION; loop++) {
+                // Create all oscillators and gain nodes for the sequence
+                for (let i = 0; i < savedNotes.length && currentTime < TOTAL_DURATION; i++) {
+                    const noteObj = savedNotes[i];
+                    const duration = Math.min(
+                        rhythmPattern[i % rhythmPattern.length],
+                        TOTAL_DURATION - currentTime // Ensure we don't exceed 20 seconds
+                    );
                     
-        //             if (availableChords.length > 0) {
-        //                 const randomChordName = availableChords[Math.floor(Math.random() * availableChords.length)];
-        //                 const chordNotes = currentChords[randomChordName];
-                        
-        //                 if (Array.isArray(chordNotes)) {
-        //                     chordNotes.forEach(chordNote => {
-        //                         if (frequencies[chordNote]) {
-        //                             const chordOsc = offlineContext.createOscillator();
-        //                             const chordGain = offlineContext.createGain();
-        
-        //                             chordOsc.type = 'sine';
-        //                             chordOsc.frequency.setValueAtTime(
-        //                                 frequencies[chordNote], 
-        //                                 currentTime
-        //                             );
-        
-        //                             const chordGainValue = 0.05;
-        //                             chordGain.gain.setValueAtTime(chordGainValue, currentTime);
-        //                             chordGain.gain.exponentialRampToValueAtTime(
-        //                                 0.01, 
-        //                                 currentTime + duration
-        //                             );
-        
-        //                             chordOsc.connect(chordGain);
-        //                             chordGain.connect(destination);
-        
-        //                             chordOsc.start(currentTime);
-        //                             chordOsc.stop(currentTime + duration);
-        //                         }
-        //                     });
-        //                 }
-        //             }
-        
-        //             oscillator.start(currentTime);
-        //             oscillator.stop(currentTime + duration);
-        //         }
+                    if (duration <= 0) break; // Skip if no duration left
+
+                    // Get the frequency for the melody note
+                    const currentFrequencies = getFrequenciesForKey(noteObj.key);
+                    const notes = Object.keys(currentFrequencies);
+                    const frequency = currentFrequencies[notes[noteObj.order]];
+
+                    // Create and schedule melody note
+                    const oscillator = offlineCtx.createOscillator();
+                    const gainNode = offlineCtx.createGain();
+
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(frequency, currentTime);
+
+                    gainNode.gain.setValueAtTime(0.5, currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(offlineCtx.destination);
+
+                    oscillator.start(currentTime);
+                    oscillator.stop(currentTime + duration);
+
+                    // Add accompanying chord
+                    const currentChords = musicalScales[noteObj.key].chords;
+                    const availableChords = Object.keys(currentChords);
+
+                    if (availableChords.length > 0) {
+                        const randomChordName = availableChords[noteObj.order];
+                        const chordNotes = currentChords[randomChordName];
+
+                        // Create oscillators for each chord note
+                        chordNotes.forEach(noteName => {
+                            if (currentFrequencies[noteName]) {
+                                const chordOsc = offlineCtx.createOscillator();
+                                const chordGain = offlineCtx.createGain();
+
+                                chordOsc.type = 'sine';
+                                chordOsc.frequency.setValueAtTime(currentFrequencies[noteName], currentTime);
+
+                                chordGain.gain.setValueAtTime(0.15, currentTime);
+                                chordGain.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
+
+                                chordOsc.connect(chordGain);
+                                chordGain.connect(offlineCtx.destination);
+
+                                chordOsc.start(currentTime);
+                                chordOsc.stop(currentTime + duration);
+                            }
+                        });
+                    }
+
+                    currentTime += duration;
+                }
+            }
+
+            // Add a fade out effect in the last second
+            const masterGain = offlineCtx.createGain();
+            masterGain.gain.setValueAtTime(1, TOTAL_DURATION - 1);
+            masterGain.gain.linearRampToValueAtTime(0, TOTAL_DURATION);
+
+            try {
+                // Render the audio
+                const renderedBuffer = await offlineCtx.startRendering();
                 
-        //         currentTime += duration;
-        //         currentIndex = (currentIndex + 1) % savedNotes.length;
-        //     }
-        
-        //     try {
-        //         // Render the audio
-        //         const renderedBuffer = await offlineContext.startRendering();
+                // Convert to WAV
+                const wavData = audioBufferToWav(renderedBuffer);
                 
-        //         // Create MP3 encoder
-        //         const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, kbps);
-        //         const mp3Data = [];
-        
-        //         // Convert Float32Array to Int16Array
-        //         const samples = new Int16Array(renderedBuffer.length);
-        //         const leftChannel = renderedBuffer.getChannelData(0);
+                // Create and trigger download
+                const blob = new Blob([wavData], { type: 'audio/wav' });
+                const url = URL.createObjectURL(blob);
+                const downloadLink = document.createElement('a');
+                downloadLink.href = url;
+                downloadLink.download = fileName;
+                downloadLink.click();
                 
-        //         // Convert and clip samples
-        //         for (let i = 0; i < renderedBuffer.length; i++) {
-        //             // Convert float32 to int16
-        //             const sample = Math.max(-1, Math.min(1, leftChannel[i]));
-        //             samples[i] = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
-        //         }
+                // Cleanup
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+                console.error('Error generating audio:', error);
+                alert('Failed to generate audio file');
+            }
+        }
+
+        function audioBufferToWav(audioBuffer) {
+            const numberOfChannels = audioBuffer.numberOfChannels;
+            const length = audioBuffer.length;
+            const sampleRate = audioBuffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+            
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numberOfChannels * bytesPerSample;
+            
+            const wavBuffer = new ArrayBuffer(44 + length * blockAlign);
+            const view = new DataView(wavBuffer);
+            
+            // Write WAV header
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + length * blockAlign, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numberOfChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, length * blockAlign, true);
+            
+            // Write audio data
+            const offset = 44;
+            const channels = [];
+            for (let i = 0; i < numberOfChannels; i++) {
+                channels.push(audioBuffer.getChannelData(i));
+            }
+            
+            for (let i = 0; i < length; i++) {
+                for (let channel = 0; channel < numberOfChannels; channel++) {
+                    const sample = Math.max(-1, Math.min(1, channels[channel][i]));
+                    const int16 = Math.floor(sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
+                    view.setInt16(offset + (i * blockAlign) + (channel * bytesPerSample), int16, true);
+                }
+            }
+            
+            return wavBuffer;
+        }
         
-        //         // Encode to MP3 in chunks
-        //         const mp3ChunkSize = 1152; // Must be multiple of 576
-        //         for (let i = 0; i < samples.length; i += mp3ChunkSize) {
-        //             const sampleChunk = samples.subarray(i, i + mp3ChunkSize);
-        //             const mp3buf = mp3encoder.encodeBuffer(sampleChunk);
-        //             if (mp3buf.length > 0) {
-        //                 mp3Data.push(new Int8Array(mp3buf));
-        //             }
-        //         }
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
         
-        //         // Finish encoding
-        //         const mp3buf = mp3encoder.flush();
-        //         if (mp3buf.length > 0) {
-        //             mp3Data.push(new Int8Array(mp3buf));
-        //         }
-        
-        //         // Create MP3 Blob and download
-        //         const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-        //         const url = URL.createObjectURL(blob);
-        //         const link = document.createElement('a');
-        //         link.href = url;
-        //         link.download = 'sequence.mp3';
-        //         link.click();
-        //         URL.revokeObjectURL(url);
-        
-        //     } catch (error) {
-        //         console.error('Error generating MP3:', error);
-        //         alert('Error generating MP3. Please try again.');
-        //     } finally {
-        //         document.body.removeChild(loadingDiv);
-        //     }
-        // }

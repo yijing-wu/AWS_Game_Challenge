@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import FilterSwitcher from "./FilterSwitcher";
-import { playBgm, playSequence, stopSequence, stopBgm ,clearSavedNotes} from "./music";
+import { playBgm, playSequence, downloadSequence, stopBgm ,clearSavedNotes} from "./music";
 import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
@@ -109,6 +109,14 @@ function App() {
     setIsFloating(false); // Hide the input overlay
     // Optionally show a success message
     alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
+  };
+
+  const handleDownload = async () => {
+      try {
+          await downloadSequence();
+      } catch (error) {
+          console.error('Download failed:', error);
+      }
   };
 
   return (
@@ -240,6 +248,26 @@ function App() {
                 onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
               >
                 {isPlaying ? 'Stop Playing' : 'Create your music'}
+              </button>
+              <button
+                className="play-button"
+                onClick={handleDownload}
+                style={{
+                  padding: '10px 20px',
+                  fontSize: '16px',
+                  fontFamily: "'Pacifico', cursive",
+                  backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'background-color 0.3s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = isPlaying ? '#ff4c4c' : '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
+              >
+                {'Download'}
               </button>
             </div>
             

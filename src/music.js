@@ -385,6 +385,11 @@
             playNotesWithRhythm();
         }
 
+        export function clearSavedNotes() {
+            savedNotes = [];
+            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+            displaySavedNotes();
+        }
 
         export function playBgm() {
             const sequence = [0, 2, 3, 4, 5, 6, 2, 1, 7, 4, 3, 2, 0, 5, 6, 4, 3, 2, 1];

@@ -4,59 +4,84 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import FilterSwitcher from "./FilterSwitcher";
-import { playSequence } from "./music";
+import { playBgm, playSequence , stopBgm ,clearSavedNotes} from "./music";
 import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
 import { generateContent } from "./components/services/api";
 
 function App() {
+  const [gameState, setGameState] = useState("idle"); // "idle", "notegame", "selectFilter", "sendEmail"
   const [hitCount, setHitCount] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false);
-  const [lastNote, setLastNote] = useState(""); // State for last played note
-  const [showFilterSwitcher, setShowFilterSwitcher] = useState(false);
+  const [lastNote, setLastNote] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFloating, setIsFloating] = useState(false);
   const [htmlContents, setHtmlContents] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
   const [formData, setFormData] = useState({
-    receiver: '',
-    relationship: '',
-    holiday: '',
-    additional_info: '',
-    tone: '',
-    sender: ''
+    receiver: "",
+    relationship: "",
+    holiday: "",
+    additional_info: "",
+    tone: "",
+    sender: ""
   });
 
   const startGame = () => {
-    setGameStarted(true);
-    setGameOver(false);
+    setGameState("startgame"); 
+  };
+
+  const handleComputerClick = () => {
+    if (gameState === "startgame"){
+      setGameState("notegame");
+      setHitCount(0);
+      setLastNote("");
+    }
+  }
+
+  const handleRestartGame = () =>{
+    setGameState("notegame");
     setHitCount(0);
     setLastNote("");
-    setShowFilterSwitcher(false);
-  };
+    stopBgm();
+  }
 
   useEffect(() => {
-    if (hitCount >= 10) {
-      setGameOver(true);
-      setGameStarted(false);
+    if (gameState === "notegame" && hitCount >= 10) {
+      setGameState("playSequence");
     }
-  }, [hitCount]);
-
-  const handleBooksClick = () => {
-    if (gameOver) {
-      setShowFilterSwitcher(true);
-    }
-  };
+  }, [hitCount, gameState]);
 
   const handlePlaySequence = () => {
-    setIsPlaying((prev) => !prev);
-    playSequence();
+    if (gameState === "playSequence") {
+      setIsPlaying((prev) => {
+        const newIsPlaying = !prev;
+        if (newIsPlaying) {
+          playBgm(); 
+        } else {
+          stopBgm();
+        }
+        return newIsPlaying;
+      });
+    }
+  };
+ 
+  const handleBooksClick = () => {
+    if (gameState === "playSequence") {
+      setGameState("selectFilter");
+    }
   };
 
-  const handlePaperClick = () => setIsFloating(true);
+  const handleFilterConfirmed = () => {
+    setGameState("sendEmail");
+  };
+
+  const handlePaperClick = () => {
+    if (gameState === "sendEmail") {
+      setGameState("inputOverlay");
+      setIsFloating(true);
+    }
+  };
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -90,68 +115,151 @@ function App() {
 
   return (
     <div style={{ height: "100vh", position: "relative" }}>
-      <Canvas shadows>
-        <DeskScene
-          onComputerClick={startGame}
-          onBooksClick={handleBooksClick}
-        />
-        <Paper onPointerDown={handlePaperClick} />
-        {gameStarted && (
-          <NoteGame
-            hitCount={hitCount}
-            setHitCount={setHitCount}
-            setLastNote={setLastNote} // Pass setLastNote
-          />
-        )}
-        <OrbitControls 
-          enablePan={false}
-          enableZoom={false}
-          enableRotate={false}
-        />
-        <InputOverlay
-          isFloating={isFloating}
-          text={formData}
-          setText={setFormData}
-          handleSubmit={handleSubmit}
-        />
-      </Canvas>
-
-      <div
-        style={{
+      {/* Start Game Screen */}
+      {gameState === "idle" && (
+        <div style={{
           position: "absolute",
-          top: "10px",
-          left: "10px",
+          top: "0",
+          left: "0",
+          width: "100%",
+          height: "100%",
+          backgroundColor: "#000",
+          backgroundImage: "url('https://darksky.org/app/uploads/2020/03/hero-Night-Sky-Family-Activities.jpg')",
+          backgroundSize: "cover",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
           color: "white",
-          fontSize: "20px",
-        }}
-      >
-        <div>Hit Count: {hitCount}</div>
-        <div>Last Note: {lastNote}</div> {/* Display the last note */}
-        {gameOver && (
-          <div style={{ marginTop: "20px" }}>
-            Game Over!
-            <button onClick={startGame}>Restart</button>
-            <button
-        className="play-button"
-        onClick={handlePlaySequence}
-        style={{
-          backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
-        }}
-      >
-        {isPlaying ? 'Stop Sequence' : 'Play Sequence'}
-      </button>
+          fontFamily: "'Pacifico', cursive",
+          fontSize: "50px",
+          flexDirection: "column",
+          textAlign: "center",
+          zIndex: gameState === "idle" ? 2 : 1, 
+        }}>
+          <div>Welcome to the Game!</div>
+          <button 
+            onClick={startGame} 
+            style={{
+              backgroundColor: "transparent",
+              border: "2px solid white",
+              borderRadius: "5px",
+              padding: "10px 20px",
+              marginTop: "20px",
+              color: "white",
+              fontSize: "20px",
+              cursor: "pointer"
+            }}>
+            Start Game
+          </button>
+        </div>
+      )}
+  
+      {/* Game Content */}
+      {gameState !== "idle" && (
+        <div style={{ height: "100vh", position: "relative" }}>
+          <Canvas shadows>
+            <DeskScene onComputerClick={handleComputerClick} onBooksClick={handleBooksClick} />
+            {gameState === "notegame" && (
+              <NoteGame hitCount={hitCount} setHitCount={setHitCount} setLastNote={setLastNote} />
+            )}
+            <Paper onPointerDown={handlePaperClick} />
+            <OrbitControls 
+              enablePan={false} 
+              enableZoom={false} 
+              enableRotate={false} 
+            />
+            {gameState === "inputOverlay" && (
+              <InputOverlay
+                isFloating={isFloating}
+                text={formData}
+                setText={setFormData}
+                handleSubmit={handleSubmit}
+              />
+            )}
+          </Canvas>
+  
+          <div
+            style={{
+              position: "absolute",
+              top: "10px",
+              left: "10px",
+              color: "white",
+              fontSize: "20px",
+              fontFamily: "'Pacifico', cursive",
+              zIndex: 1, 
+            }}
+          >
+            {gameState === "notegame" && (
+              <>
+                <div>You need to click {10-hitCount} more 🎵 to create your own sequence</div>
+                <div>The ball you received is {lastNote} note</div>
+              </>
+            )}
+            {gameState === "playSequence" && (
+             <div style={{
+              marginTop: "20px", 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              gap: '15px'
+            }}>
+              <button 
+                onClick={handleRestartGame} 
+                style={{
+                  padding: '10px 20px', 
+                  fontSize: '16px', 
+                  fontFamily: "'Pacifico', cursive",
+                  backgroundColor: '#4CAF50', 
+                  color: 'white', 
+                  border: 'none', 
+                  borderRadius: '5px', 
+                  cursor: 'pointer', 
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
+                  transition: 'background-color 0.3s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+              >
+                Restart
+              </button>
+            
+              <button
+                className="play-button"
+                onClick={handlePlaySequence}
+                style={{
+                  padding: '10px 20px',
+                  fontSize: '16px',
+                  fontFamily: "'Pacifico', cursive",
+                  backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'background-color 0.3s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = isPlaying ? '#ff4c4c' : '#45a049'}
+                onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
+              >
+                {isPlaying ? 'Stop Playing' : 'Create your music'}
+              </button>
+            </div>
+            
+            )}
+            {gameState === "selectFilter" && (
+              <FilterSwitcher onConfirm={handleFilterConfirmed} />
+            )}
           </div>
-        )}
-        {showFilterSwitcher && <FilterSwitcher />}
-      </div>
-
-      <ResponseDisplay 
-        htmlContents={htmlContents}
-        isLoading={isLoading}
-        onChoiceSubmitted={handleChoiceSubmitted}
-      />
+  
+          <ResponseDisplay 
+            htmlContents={htmlContents}
+            isLoading={isLoading}
+            onChoiceSubmitted={handleChoiceSubmitted}
+          />
+        </div>
+      )}
     </div>
-  );
+  );  
 }
 
 export default App;

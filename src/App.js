@@ -10,7 +10,7 @@ function App() {
   const [hitCount, setHitCount] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
-  const [lastNote, setLastNote] = useState(""); // State for last played note
+  const [lastNote, setLastNote] = useState(""); 
   const [showFilterSwitcher, setShowFilterSwitcher] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false); 
 
@@ -60,8 +60,8 @@ function App() {
       <div
         style={{
           position: "absolute",
-          top: "10px",
-          left: "10px",
+          top: "50px",
+          left: "50px",
           color: "white",
           fontSize: "20px",
         }}

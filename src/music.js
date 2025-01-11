@@ -298,44 +298,49 @@
         let lastSaveTime = 0;
 
         export function saveNote(order) {
+            const now = Date.now();
+            // Prevent duplicate saves within 100ms
+            if (now - lastSaveTime < 100) {
+                return;
+            }
+            const noteObject = {
+                order: order,
+                key: currentKey, // Ensure currentKey is valid
+            };
 
-        const now = Date.now();
-        // Prevent duplicate saves within 100ms
-        if (lastSavedNote === order && (now - lastSaveTime) < 100) {
-            return;
+            savedNotes.push(noteObject);
+            lastSaveTime = now;
+
+            if (savedNotes.length > 10) {
+                savedNotes = savedNotes.slice(-10); // Keep only the last 10 notes
+            }
+
+            lastSaveTime = now;
         }
-          const noteObject = {
-            order: order,
-            key: currentKey, // Ensure currentKey is valid
-          };
 
-          savedNotes.push(noteObject);
+        export function clearSavedNotes() {
+            savedNotes = [];
+            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
+        }
 
-          if (savedNotes.length > 10) {
-            savedNotes = savedNotes.slice(-10); // Keep only the last 10 notes
-          }
+        export function stopSequence() {
+            // Stop playing
+            clearInterval(playingInterval);
+            isPlaying = false;
 
-          lastSavedNote = order;
-          lastSaveTime = now;
+            // Optionally suspend the audio context when stopping
+            if (noteAudioContext) {
+                noteAudioContext.suspend();
+            }
+            return;
         }
 
         export function playSequence() {
             const button = document.querySelector('.play-button');
-
-            if (isPlaying) {
-                // Stop playing
-                clearInterval(playingInterval);
-                isPlaying = false;
-                button.textContent = 'Play Sequence';
-                button.style.backgroundColor = '#4CAF50';
-
-                // Optionally suspend the audio context when stopping
-                if (noteAudioContext) {
-                    noteAudioContext.suspend();
-                }
+            if(isPlaying) {
+                stopSequence();
                 return;
             }
-
             // Don't start if there are no notes
             if (savedNotes.length === 0) {
                 alert('No notes to play! Please add some notes first.');
@@ -345,13 +350,16 @@
             // Start playing
             isPlaying = true;
            // button.textContent = 'Stop Sequence';
-            button.style.backgroundColor = '#ff6b6b';
+            // button.style.backgroundColor = '#ff6b6b';
 
             const rhythmPattern = generateJazzDurations(savedNotes.length);
             let currentIndex = 0;
 
             async function playNotesWithRhythm() {
-                if (!isPlaying) return;
+                if (!isPlaying || currentIndex >= savedNotes.length) {
+                    isPlaying = false;
+                    return;
+                }
 
                 const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
                 const noteObj = savedNotes[currentIndex];
@@ -363,7 +371,7 @@
                 const currentChords = musicalScales[noteObj.key].chords;
                 const availableChords = Object.keys(currentChords);
 
-                // Play a random chord
+                // Play a corresponding
                 if (availableChords.length > 0) {
                     const randomChordName = availableChords[noteObj.order];
                     const chordNotes = currentChords[randomChordName];
@@ -385,46 +393,61 @@
             playNotesWithRhythm();
         }
 
-        export function clearSavedNotes() {
-            savedNotes = [];
-            localStorage.setItem('savedNotes', JSON.stringify(savedNotes));
-            displaySavedNotes();
-        }
-
         export function playBgm() {
-            const sequence = [0, 2, 3, 4, 5, 6, 2, 1, 7, 4, 3, 2, 0, 5, 6, 4, 3, 2, 1];
-
-            let currentIndex = 0;
-            const pauseDuration = 0;
-
-            // Generate jazz durations for the entire sequence
-            const noteDurations = generateJazzDurations(sequence.length);
-
-            changeKey('eMinor');
-            bgmPlaying = true;
-
-            function playNextNote() {
-                if (!bgmPlaying) return;
-
+            try {
+                const sequence = [0, 2, 3, 4, 5, 6, 2, 1, 7, 4, 3, 2, 0, 5, 6, 4, 3, 2, 1];
                 const bgmAudioContext = getBgmAudioContext();
-                if (bgmAudioContext.state === 'suspended') {
-                    bgmAudioContext.resume();
+                if (!bgmAudioContext) {
+                    console.error('Failed to get audio context');
+                    return;
                 }
+                const bgmGain = 0.1; // volume
 
-                // Use the pre-generated duration for the current note
-                const noteDuration = noteDurations[currentIndex];
+                const rhythmPattern = generateJazzDurations(sequence.length);
+                let currentIndex = 0;
 
-                playNote(sequence[currentIndex], noteDuration, bgmAudioContext, 0.1);
-                currentIndex = (currentIndex + 1) % sequence.length;
+                changeKey('eMinor');
+                bgmPlaying = true;
 
-                setTimeout(() => {
-                    if (bgmPlaying) {
-                        playNextNote();
+                async function playNextNote() {
+
+                    if (!bgmPlaying) {
+                        return;
                     }
-                }, (noteDuration + pauseDuration) * 1000);
+                    // Generate jazz durations for the entire sequence
+                    const duration = rhythmPattern[Math.floor(Math.random() * rhythmPattern.length)];
+                    // const bgmAudioContext = getBgmAudioContext();
+                    if (bgmAudioContext.state === 'suspended') {
+                        bgmAudioContext.resume();
+                    }
+
+                    // Use the pre-generated duration for the current note
+                    // const noteDuration = noteDurations[currentIndex];
+
+
+                    playNote(sequence[currentIndex], duration, bgmAudioContext, bgmGain);
+
+                    currentIndex = (currentIndex + 1) % sequence.length;
+
+                    // Schedule next note
+                    setTimeout(() => {
+                        if (bgmPlaying) {
+                            playNextNote();
+                        }
+                    }, duration * 1000);
+
+                    // await new Promise(resolve => setTimeout(resolve, duration * 1000));
+
+                    // if (isPlaying) {
+                    //     playNextNote();
+                    // }
             }
 
-            playNextNote();
+            playNextNote();}
+            catch (error) {
+                console.error('Error playing BGM:', error);
+            }
+
         }
 
         export function stopBgm() {

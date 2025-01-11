@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import FilterSwitcher from "./FilterSwitcher";
-import { playBgm, playSequence, stopSequence, stopBgm ,clearSavedNotes} from "./music";
+import { playBgm, playSequence, downloadSequence, stopBgm ,clearSavedNotes} from "./music";
 import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
@@ -107,6 +107,14 @@ function App() {
     setIsFloating(false); // Hide the input overlay
     // Optionally show a success message
     alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
+  };
+
+  const handleDownload = async () => {
+      try {
+          await downloadSequence();
+      } catch (error) {
+          console.error('Download failed:', error);
+      }
   };
 
   return (

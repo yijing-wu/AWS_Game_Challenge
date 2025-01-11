@@ -107,8 +107,8 @@ function App() {
           position: "absolute",
           top: "0",
           left: "0",
-          width: "100%",
-          height: "100%",
+          width: "50%",
+          height: "50%",
           backgroundColor: "#000",
           backgroundImage: "url('https://darksky.org/app/uploads/2020/03/hero-Night-Sky-Family-Activities.jpg')",
           backgroundSize: "cover",
@@ -138,7 +138,7 @@ function App() {
           </button>
         </div>
       )}
- </div>
+
       {/* Game Content */}
       {gameState !== "idle" && (
         <div>
@@ -204,7 +204,7 @@ function App() {
           />
         </div>
       )}
-   
+    </div>
   );
 }
 

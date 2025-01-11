@@ -4,7 +4,7 @@ import { OrbitControls } from "@react-three/drei";
 import DeskScene from "./components/scene/DeskScene";
 import NoteGame from "./NoteGame";
 import FilterSwitcher from "./FilterSwitcher";
-import { playBgm, playSequence, stopSequence, stopBgm ,clearSavedNotes} from "./music";
+import { playBgm, playSequence, downloadSequence, stopBgm ,clearSavedNotes} from "./music";
 import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
@@ -12,6 +12,7 @@ import { generateContent } from "./components/services/api";
 
 function App() {
   const [gameState, setGameState] = useState("idle"); // "idle", "notegame", "selectFilter", "sendEmail"
+  const [isLoadingScreen, setIsLoadingScreen] = useState(false);
   const [hitCount, setHitCount] = useState(0);
   const [lastNote, setLastNote] = useState("");
   const [isPlaying, setIsPlaying] = useState(false);
@@ -30,6 +31,11 @@ function App() {
   const startGame = () => {
     setGameState("startgame"); 
     playBgm();
+    setIsLoadingScreen(true); 
+    setTimeout(() => {
+      setIsLoadingScreen(false); // Hide loading screen after delay
+      setGameState("startgame");
+    }, 3000);
   };
 
   const handleComputerClick = () => {
@@ -40,18 +46,10 @@ function App() {
       stopBgm();
     }
   }
-
-  const handleRestartGame = () =>{
-    setGameState("notegame");
-    setHitCount(0);
-    setLastNote("");
-    clearSavedNotes(); // Clear the previously saved notes
-    // stopBgm();
-  }
-
   useEffect(() => {
     if (gameState === "notegame" && hitCount >= 10) {
       setGameState("playSequence");
+      handlePlaySequence();
     }
   }, [hitCount, gameState]);
 
@@ -111,10 +109,18 @@ function App() {
     alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
   };
 
+  const handleDownload = async () => {
+      try {
+          await downloadSequence();
+      } catch (error) {
+          console.error('Download failed:', error);
+      }
+  };
+
   return (
     <div style={{ height: "100vh", position: "relative" }}>
       {/* Start Game Screen */}
-      {gameState === "idle" && (
+      {gameState === "idle" && !isLoadingScreen && (
         <div style={{
           position: "absolute",
           top: "0",
@@ -144,6 +150,7 @@ function App() {
               padding: "10px 20px",
               marginTop: "20px",
               color: "white",
+              fontFamily: "'Pacifico', cursive",
               fontSize: "20px",
               cursor: "pointer"
             }}>
@@ -152,6 +159,51 @@ function App() {
         </div>
       )}
   
+  {/* Loading Screen */}
+  {isLoadingScreen && (
+        <div
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#000",
+            backgroundImage: "url('https://darksky.org/app/uploads/2020/03/hero-Night-Sky-Family-Activities.jpg')",
+            backgroundSize: "cover",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "white",
+            fontFamily: "'Pacifico', cursive",
+            fontSize: "50px",
+            flexDirection: "column",
+            textAlign: "center",
+            zIndex: 3,
+          }}
+        >
+          <div>Loading...</div>
+          <div
+            style={{
+              marginTop: "20px",
+              border: "5px solid white",
+              borderRadius: "50%",
+              width: "50px",
+              height: "50px",
+              borderTop: "5px solid transparent",
+              animation: "spin 1s linear infinite",
+            }}
+          ></div>
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      )}
+
+
       {/* Game Content */}
       {gameState !== "idle" && (
         <div style={{ height: "100vh", position: "relative" }}>
@@ -193,61 +245,11 @@ function App() {
                 <div>The ball you received is {lastNote} note</div>
               </>
             )}
-            {gameState === "playSequence" && (
-             <div style={{
-              marginTop: "20px", 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
-              gap: '15px'
-            }}>
-              <button 
-                onClick={handleRestartGame} 
-                style={{
-                  padding: '10px 20px', 
-                  fontSize: '16px', 
-                  fontFamily: "'Pacifico', cursive",
-                  backgroundColor: '#4CAF50', 
-                  color: 'white', 
-                  border: 'none', 
-                  borderRadius: '5px', 
-                  cursor: 'pointer', 
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)', 
-                  transition: 'background-color 0.3s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
-                onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
-              >
-                Restart
-              </button>
-            
-              <button
-                className="play-button"
-                onClick={handlePlaySequence}
-                style={{
-                  padding: '10px 20px',
-                  fontSize: '16px',
-                  fontFamily: "'Pacifico', cursive",
-                  backgroundColor: isPlaying ? '#ff6b6b' : '#4CAF50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                  transition: 'background-color 0.3s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = isPlaying ? '#ff4c4c' : '#45a049'}
-                onMouseOut={(e) => e.target.style.backgroundColor = isPlaying ? '#ff6b6b' : '#4CAF50'}
-              >
-                {isPlaying ? 'Stop Playing' : 'Create your music'}
-              </button>
-            </div>
-            
-            )}
-            {gameState === "selectFilter" && (
-              <FilterSwitcher onConfirm={handleFilterConfirmed} />
-            )}
           </div>
+
+          {gameState === "selectFilter" && (
+              <FilterSwitcher onConfirm={handleFilterConfirmed} />
+          )}
   
           <ResponseDisplay 
             htmlContents={htmlContents}

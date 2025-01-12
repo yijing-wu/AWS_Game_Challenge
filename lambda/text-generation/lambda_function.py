@@ -36,7 +36,6 @@ Tone: {body['tone']}
 Additional information: {body['additional_info']}
 MusicLink: {body['music_link']}
 """
-    # TODO: Update the music link
 
     conversation = [
         {"role": "user", "content": [{"text": guidelines}]},

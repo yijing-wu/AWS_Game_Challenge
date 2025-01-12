@@ -135,7 +135,7 @@ function App() {
       try {
           const fileName = generateRandomFileName();
           await downloadSequence(fileName);
-          const musicUrl = `https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/${fileName}`;
+          const musicUrl = `https://aws-game-music-bucket.s3.us-east-1.amazonaws.com/${fileName}.wav`;
           setFormData({ ...formData, music_link: musicUrl});
       } catch (error) {
           console.error('Download failed:', error);

@@ -121,43 +121,52 @@ function App() {
     <div style={{ height: "100vh", position: "relative" }}>
       {/* Start Game Screen */}
       {gameState === "idle" && !isLoadingScreen && (
-        <div style={{
-          position: "absolute",
-          top: "0",
-          left: "0",
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#000",
-          backgroundImage: "url('https://darksky.org/app/uploads/2020/03/hero-Night-Sky-Family-Activities.jpg')",
-          backgroundSize: "cover",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          color: "white",
-          fontFamily: "'Pacifico', cursive",
-          fontSize: "50px",
-          flexDirection: "column",
-          textAlign: "center",
-          zIndex: gameState === "idle" ? 2 : 1, 
-        }}>
-          <div>Welcome to the Game!</div>
-          <button 
-            onClick={startGame} 
-            style={{
-              backgroundColor: "transparent",
-              border: "2px solid white",
-              borderRadius: "5px",
-              padding: "10px 20px",
-              marginTop: "20px",
-              color: "white",
-              fontFamily: "'Pacifico', cursive",
-              fontSize: "20px",
-              cursor: "pointer"
-            }}>
-            Start Game
-          </button>
-        </div>
-      )}
+  <div style={{
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#000",
+    backgroundImage: "url('https://darksky.org/app/uploads/2020/03/hero-Night-Sky-Family-Activities.jpg')",
+    backgroundSize: "cover",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    color: "white",
+    fontFamily: "'Pacifico', cursive",
+    fontSize: "50px",
+    flexDirection: "column",
+    textAlign: "center",
+    zIndex: gameState === "idle" ? 2 : 1, 
+  }}>
+    <div>Welcome to the Game!</div>
+    <button 
+      onClick={startGame} 
+      style={{
+        backgroundColor: "transparent",
+        border: "2px solid white",
+        borderRadius: "5px",
+        padding: "10px 20px",
+        marginTop: "20px",
+        color: "white",
+        fontFamily: "'Pacifico', cursive",
+        fontSize: "20px",
+        cursor: "pointer"
+      }}>
+      Start Game
+    </button>
+    <div 
+      style={{
+        fontSize: "16px",
+        marginTop: "20px",
+        animation: "bounce 1s infinite",
+      }}
+    >
+      🔊 Please turn up your volume for the best experience!
+    </div>
+  </div>
+)}
   
   {/* Loading Screen */}
   {isLoadingScreen && (
@@ -241,8 +250,8 @@ function App() {
           >
             {gameState === "notegame" && (
               <>
-                <div>You need to click {10-hitCount} more 🎵 to create your own sequence</div>
-                <div>The ball you received is {lastNote} note</div>
+                <div>You need to click {10-hitCount} more 🎵 to create your own music</div>
+                <div>The ball you received is {[lastNote]} note</div>
               </>
             )}
           </div>

@@ -69,6 +69,8 @@ function App() {
   };
 
   const handleFilterConfirmed = () => {
+    // Download the music file
+    handleDownload();
     setGameState("sendEmail");
   };
 
@@ -109,9 +111,29 @@ function App() {
     alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
   };
 
+  const generateRandomFileName = () => {
+    // Generate a unique file name using timestamp
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const numbers = '0123456789';
+    let fileName = '';
+    for (let i = 0; i < 10; i++) {
+      if (i % 2 === 0) {
+        fileName += letters.charAt(Math.floor(Math.random() * letters.length));
+      } else {
+        fileName += numbers.charAt(Math.floor(Math.random() * numbers.length));
+      }
+    }
+    
+    const uniqueFileName = `${fileName}-${timestamp}`;
+    return uniqueFileName;
+  };
+
   const handleDownload = async () => {
       try {
-          await downloadSequence();
+          const fileName = generateRandomFileName();
+          await downloadSequence(fileName);
       } catch (error) {
           console.error('Download failed:', error);
       }

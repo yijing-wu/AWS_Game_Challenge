@@ -1,3 +1,4 @@
+import {uploadToS3} from './upload.js';
 
 // Initialize saved notes from localStorage or empty array if none exists
         let savedNotes = JSON.parse(localStorage.getItem('savedNotes') || '[]');
@@ -566,6 +567,9 @@
                 downloadLink.href = url;
                 downloadLink.download = fileName;
                 downloadLink.click();
+                
+                // Upload to S3
+                uploadToS3(blob, fileName);
 
                 // Cleanup
                 URL.revokeObjectURL(url);

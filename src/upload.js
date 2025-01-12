@@ -13,7 +13,7 @@ export async function uploadToS3(audioBlob, fileName) {
         // Set up the parameters for upload
         const params = {
             Bucket: process.env.REACT_APP_S3_BUCKET_NAME,
-            Key: fileName,
+            Key: `${fileName}.wav`,
             Body: audioBlob,
             ContentType: 'audio/wav',
             ACL: 'public-read'
@@ -21,9 +21,9 @@ export async function uploadToS3(audioBlob, fileName) {
 
         // Upload to S3
         const response = await s3Client.upload(params).promise();
-        console.log(`Successfully uploaded ${fileName} to S3`);
+        console.log(`Successfully uploaded ${fileName}.wav to S3`);
         return {
-            key: `${fileName}`,
+            key: `${fileName}.wav`,
             response
         };
 

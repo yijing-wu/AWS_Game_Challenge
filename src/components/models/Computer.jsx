@@ -8,8 +8,7 @@ export default function Computer({ gameState, position, onClick }) {
 
   // Define which states the computer should be active in
   const isActive = gameState === "startgame" || 
-                  gameState === "notegame" || 
-                  gameState === "playSequence";
+                  gameState === "notegame";
 
   // Define which states the computer is interactive in
   const isInteractive = gameState === "startgame" || 

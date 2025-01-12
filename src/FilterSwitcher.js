@@ -26,8 +26,10 @@ const FilterSwitcher = ({ onConfirm }) => {
 
   // Handle "Confirm" button click
   const handleConfirmClick = () => {
-    onConfirm(keys[currentIndex]); // Pass the selected key back to App
+    onConfirm(keys[currentIndex]); 
+    document.body.style.background = ''; 
   };
+  
 
   return (
     <div className="filter-switcher">

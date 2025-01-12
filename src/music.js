@@ -493,7 +493,7 @@ import {uploadToS3} from './upload.js';
                     if (duration <= 0) break;
 
                     // Get the frequency for the melody note
-                    const currentFrequencies = getFrequenciesForKey(noteObj.key);
+                    const currentFrequencies = getFrequenciesForKey(currentKey);
                     const notes = Object.keys(currentFrequencies);
                     const frequency = currentFrequencies[notes[noteObj.order]];
 
@@ -562,7 +562,7 @@ import {uploadToS3} from './upload.js';
 
                 // Create and trigger download
                 const blob = new Blob([wavData], { type: 'audio/wav' });
-                
+
                 // Upload to S3
                 uploadToS3(blob, fileName);
             } catch (error) {

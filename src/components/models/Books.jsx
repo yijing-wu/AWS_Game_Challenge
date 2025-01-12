@@ -3,18 +3,27 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
-export default function Books({ position, onClick }) {
+export default function Books({ gameState, position, onClick }) {
   const { scene } = useGLTF("/models/orrery.glb");
   const [isHovered, setIsHovered] = useState(false);
   const booksRef = useRef();
 
+  // Define which states the books should be active in
+  const isActive = gameState === "selectFilter" ||
+                    gameState === "playSequence";
+
+  // Define which states the books is interactive in
+  const isInteractive = gameState === "playSequence";
+
   const handlePointerOver = (e) => {
+    if (!isInteractive) return;
     e.stopPropagation();
     setIsHovered(true);
     document.body.style.cursor = 'pointer';
   };
 
   const handlePointerOut = (e) => {
+    if (!isInteractive) return;
     e.stopPropagation();
     setIsHovered(false);
     document.body.style.cursor = 'auto';
@@ -45,7 +54,6 @@ export default function Books({ position, onClick }) {
     <group position={position}
       onClick={onClick}
       rotation={[-Math.PI/2, 0, 0]}
-      
     >
       <primitive object={scene}
       ref={booksRef}
@@ -54,7 +62,7 @@ export default function Books({ position, onClick }) {
       onPointerOut={handlePointerOut}/>
       <spotLight
         position={[0.12, 0.2, 0.2]}
-        intensity={0}
+        intensity={isActive ? 1 : 0}
         color="#ebbf9d"
         angle={-5}
         penumbra={-0.9}

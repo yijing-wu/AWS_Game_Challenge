@@ -4,6 +4,7 @@ import { playNote, saveNote } from "./music";
 
 export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
   const [gameObjects, setGameObjects] = useState([]);
+  const [particles, setParticles] = useState([]);
 
   // Define fixed colors for each note
   const noteColors = {
@@ -35,11 +36,9 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
         {
           id: Date.now(),
           type: randomType,
-          order: notes.indexOf(randomType), 
           order: notes.indexOf(randomType),
           position: [Math.random() - 0.5, 1, 4.4],
           speed: Math.random() * 0.001 + 0.005,
-          color: `hsl(${Math.random() * 360}, 100%, 50%)`,
           color: noteColors[randomType],
         },
       ]);
@@ -48,7 +47,9 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
     return () => clearInterval(interval);
   }, []);
 
+  // Update both game objects and particles
   useFrame(() => {
+    // Update game objects
     setGameObjects((prev) =>
       prev
         .map((obj) => ({
@@ -61,30 +62,111 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
         }))
         .filter((obj) => obj.position[1] > -3)
     );
+
+    // Update particles
+    setParticles((prev) =>
+    prev
+      .map((particle) => ({
+        ...particle,
+        velocity: [
+          particle.velocity[0] * particle.deceleration,
+          particle.velocity[1] * particle.deceleration - 0.0005, // Add gravity
+          particle.velocity[2] * particle.deceleration,
+        ],
+        rotation: [
+          particle.rotation[0] + particle.rotationSpeed[0],
+          particle.rotation[1] + particle.rotationSpeed[1],
+          particle.rotation[2] + particle.rotationSpeed[2],
+        ],
+        position: [
+          particle.position[0] + particle.velocity[0],
+          particle.position[1] + particle.velocity[1],
+          particle.position[2] + particle.velocity[2],
+        ],
+        life: particle.life - 0.01,
+      }))
+      .filter((particle) => particle.life > 0)
+    );
   });
 
-  const handleClick = (id, type, order) => {
+  const createParticles = (position, color) => {
+    const colors = [color, '#ffffff']; // Base color plus festive colors
+    const newParticles = Array(40).fill().map(() => {
+      const theta = Math.random() * 2 * Math.PI;
+      const phi = Math.random() * Math.PI;
+      const speed = 0.01 + Math.random() * 0.015;
+
+      return {
+        position: [...position],
+        velocity: [
+          speed * Math.sin(phi) * Math.cos(theta),
+          speed * Math.sin(phi) * Math.sin(theta) + 0.01, // Add slight upward bias
+          speed * Math.cos(phi),
+        ],
+        rotation: [
+          Math.random() * Math.PI,
+          Math.random() * Math.PI,
+          Math.random() * Math.PI
+        ],
+        rotationSpeed: [
+          (Math.random() - 0.5) * 0.3,
+          (Math.random() - 0.5) * 0.3,
+          (Math.random() - 0.5) * 0.3
+        ],
+        deceleration: 0.8,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 0.6,
+        size: 0.03 + Math.random() * 0.02,
+      };
+    });
+    setParticles((prev) => [...prev, ...newParticles]);
+  };
+
+  const handleClick = (id, type, order, position) => {
     setHitCount((count) => count + 1);
-    setLastNote(type); 
-    playNote(order); 
-    saveNote(order); 
+    setLastNote(type);
+    playNote(order);
+    saveNote(order);
+
+    // Create particles at the clicked object's position
+    createParticles(position, noteColors[type]);
 
     setGameObjects((prev) => prev.filter((obj) => obj.id !== id));
   };
 
   return (
     <>
+      {/* Render game objects */}
       {gameObjects.map((obj) => (
         <group
           key={obj.id}
           position={obj.position}
-          onClick={() => handleClick(obj.id, obj.type, obj.order)}
+          onClick={() => handleClick(obj.id, obj.type, obj.order, obj.position)}
         >
           <mesh scale={[0.2, 0.2, 0.2]}>
             <sphereGeometry args={[0.2, 16, 16]} />
             <meshStandardMaterial color={obj.color} />
           </mesh>
         </group>
+      ))}
+
+      {/* Render particles */}
+      {particles.map((particle, index) => (
+        <mesh
+          key={`particle-${index}`}
+          position={particle.position}
+          rotation={particle.rotation}
+        >
+          <planeGeometry args={[particle.size*0.25, particle.size * 0.2]} />
+          <meshStandardMaterial 
+            color={particle.color}
+            transparent
+            opacity={particle.life}
+            side={2} // This replaces THREE.DoubleSide
+            metalness={0.3}
+            roughness={0.6}
+          />
+        </mesh>
       ))}
     </>
   );

@@ -562,18 +562,9 @@ import {uploadToS3} from './upload.js';
 
                 // Create and trigger download
                 const blob = new Blob([wavData], { type: 'audio/wav' });
-                const url = URL.createObjectURL(blob);
-                const downloadLink = document.createElement('a');
-                downloadLink.href = url;
-                downloadLink.download = fileName;
-                downloadLink.click();
                 
                 // Upload to S3
                 uploadToS3(blob, fileName);
-
-                // Cleanup
-                URL.revokeObjectURL(url);
-
             } catch (error) {
                 console.error('Error generating audio:', error);
                 alert('Failed to generate audio file');

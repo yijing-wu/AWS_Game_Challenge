@@ -3,8 +3,8 @@ import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { gsap } from "gsap";
 
-export default function Paper({ onFloatingComplete, ...props }) {
-  const { scene } = useGLTF("/models/paper.glb");
+export default function Paper({ position, onPointerDown, ...props }) {
+  const { scene } = useGLTF("/models/letter.glb");
   const paperRef = useRef();
   const [isViewing, setIsViewing] = useState(false);
   const { camera } = useThree();
@@ -12,6 +12,11 @@ export default function Paper({ onFloatingComplete, ...props }) {
   const handleClick = () => {
     console.log("Paper clicked!");
     
+    // Call onPointerDown to trigger the input overlay
+    if (onPointerDown) {
+      onPointerDown();
+    }
+
     // Store original camera state
     const originalPosition = {
       x: camera.position.x,
@@ -38,9 +43,9 @@ export default function Paper({ onFloatingComplete, ...props }) {
       onUpdate: () => {
         camera.lookAt(-paperPosition); // Make camera look at paper
       },
-      onComplete: () => {
-        if (onFloatingComplete) onFloatingComplete();
-      }
+      // onComplete: () => {
+      //   if (onFloatingComplete) onFloatingComplete();
+      // }
     });
 
     gsap.to(camera.rotation, {
@@ -78,12 +83,23 @@ export default function Paper({ onFloatingComplete, ...props }) {
   };
 
   return (
-    <primitive
-      ref={paperRef}
-      object={scene}
-      {...props}
-      rotation={[-1.4, 0, 0]} // Initial rotation
-      onClick={handleClick}
-    />
+    <group>
+      <primitive
+        ref={paperRef}
+        object={scene}
+        position={position} // Apply position here
+        scale={[0.05, 0.05, 0.05]}
+        rotation={[0, -90, 45]} // Convert degrees to radians
+        onClick={handleClick}
+      />
+      <pointLight
+        position={[0.6, 0.11, 4.25]} // Offset light position relative to paper
+        intensity={0}
+        color="#ebbf9d"
+        angle={0.5}
+        penumbra={1}
+        castShadow
+      />
+    </group>
   );
 }

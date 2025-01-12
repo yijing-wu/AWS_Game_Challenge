@@ -217,14 +217,18 @@ function App() {
       {gameState !== "idle" && (
         <div style={{ height: "100vh", position: "relative" }}>
           <Canvas shadows>
-            <DeskScene onComputerClick={handleComputerClick} onBooksClick={handleBooksClick} />
+            <DeskScene
+            gameState={gameState}
+            onComputerClick={handleComputerClick}
+            onBooksClick={handleBooksClick} />
+            
             {gameState === "notegame" && (
               <NoteGame hitCount={hitCount} setHitCount={setHitCount} setLastNote={setLastNote} />
             )}
             <Paper onPointerDown={handlePaperClick} />
             <OrbitControls 
               enablePan={false} 
-              enableZoom={false} 
+              // enableZoom={false} 
               enableRotate={false} 
             />
             {gameState === "inputOverlay" && (

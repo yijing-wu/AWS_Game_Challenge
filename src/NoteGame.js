@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { playNote, saveNote } from "./music";
 
-export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
+export default function NoteGame({ hitCount, setHitCount, setLastNote, gameState }) {
   const [gameObjects, setGameObjects] = useState([]);
   const [particles, setParticles] = useState([]);
+  const mainLightRef = useRef();
 
   // Define fixed colors for each note
   const noteColors = {
@@ -17,8 +18,18 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
     D: '#8F00FF'  // Violet
   };
 
+  // Control main light based on game state
+  useEffect(() => {
+    if (mainLightRef.current) {
+      // Light on during notegame, off otherwise
+      mainLightRef.current.intensity = gameState === "notegame" ? 3 : 0;
+    }
+  }, [gameState]);
+
   useEffect(() => {
     const interval = setInterval(() => {
+      if (gameState !== "notegame") return; // Only spawn notes during game
+
       const frequencies = {
         E: 329.63,
         F: 349.23,
@@ -45,7 +56,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
     }, 500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [gameState]);
 
   // Update both game objects and particles
   useFrame((state, delta) => {
@@ -136,7 +147,18 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
 
   return (
     <>
-      {/* Render game objects */}
+      {/* Main central light source */}
+      <pointLight
+        ref={mainLightRef}
+        position={[0, 1, 4.4]} // Positioned above the game area
+        angle={0.6}
+        penumbra={0.5}
+        intensity={0} // Initial intensity (will be updated based on gameState)
+        color="#ffffff"
+        castShadow
+      />
+
+      {/* Game objects */}
       {gameObjects.map((obj) => (
         <group
           key={obj.id}
@@ -145,12 +167,19 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
         >
           <mesh scale={[0.2, 0.2, 0.2]}>
             <sphereGeometry args={[0.2, 16, 16]} />
-            <meshStandardMaterial color={obj.color} />
+            <meshStandardMaterial 
+              color={obj.color}
+              transparent
+              opacity={0.8}
+              side={2}
+              metalness={0.3}
+              roughness={0.6}
+            />
           </mesh>
         </group>
       ))}
 
-      {/* Render particles */}
+      {/* Particles */}
       {particles.map((particle, index) => (
         <mesh
           key={`particle-${index}`}
@@ -162,7 +191,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
             color={particle.color}
             transparent
             opacity={particle.life}
-            side={2} // This replaces THREE.DoubleSide
+            side={2}
             metalness={0.3}
             roughness={0.6}
           />

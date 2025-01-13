@@ -245,7 +245,11 @@ function App() {
             />
             
             {gameState === "notegame" && (
-              <NoteGame hitCount={hitCount} setHitCount={setHitCount} setLastNote={setLastNote} />
+              <NoteGame 
+              hitCount={hitCount} 
+              setHitCount={setHitCount}
+              setLastNote={setLastNote}
+              gameState={gameState} />
             )}
             <OrbitControls 
               enablePan={false} 

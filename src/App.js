@@ -51,19 +51,17 @@ function App() {
     if (gameState === "notegame" && hitCount >= 10) {
       setTimeout(() => {
         setGameState("playSequence");
-        handlePlaySequence();
       }, 1000);
     }
   }, [hitCount, gameState]);
 
-  const handlePlaySequence = () => {
-    playSequence(); // another click trigger stop
+// Second useEffect - handles the actual sequence playback
+  useEffect(() => {
     if (gameState === "playSequence") {
-      setIsPlaying((prev) => {
-        return !prev;
-      });
+      playSequence();
+      setIsPlaying(true);
     }
-  };
+  }, [gameState]);
 
   const handleBooksClick = () => {
     if (gameState === "playSequence") {
@@ -245,7 +243,11 @@ function App() {
             />
             
             {gameState === "notegame" && (
-              <NoteGame hitCount={hitCount} setHitCount={setHitCount} setLastNote={setLastNote} />
+              <NoteGame 
+              hitCount={hitCount} 
+              setHitCount={setHitCount}
+              setLastNote={setLastNote}
+              gameState={gameState} />
             )}
             <OrbitControls 
               enablePan={false} 

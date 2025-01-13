@@ -8,7 +8,11 @@
 - [Team Members](#team-members)
 
 ## Project Overview
-TBD
+This game is designed to help players express love and gratitude through music on holidays and special occasions. It encourages meaningful connections by turning collected musical notes into personalized melodies that convey heartfelt emotions.
+Our team of four members, who were once classmates, created this game to bridge the physical distance between us after graduation as we now live across the globe. Despite being separated by oceans, music, and warm words have kept us close.
+The game reflects our shared humanistic values and showcases the charm of combining creativity with technology, inspiring players to connect with their loved ones in an innovative and emotional way.
+As we step into 2025, we hope everyone remembers to reconnect our old friends and cherish the bonds that have shaped our lives.
+
 
 ## Key Features
 

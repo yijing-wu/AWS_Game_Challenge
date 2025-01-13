@@ -49,8 +49,10 @@ function App() {
   }
   useEffect(() => {
     if (gameState === "notegame" && hitCount >= 10) {
-      setGameState("playSequence");
-      handlePlaySequence();
+      setTimeout(() => {
+        setGameState("playSequence");
+        handlePlaySequence();
+      }, 1000);
     }
   }, [hitCount, gameState]);
 
@@ -81,6 +83,7 @@ function App() {
       setIsFloating(true);
     }
   };
+
 
   const handleSubmit = async () => {
     setIsLoading(true);
@@ -242,14 +245,19 @@ function App() {
       {gameState !== "idle" && (
         <div style={{ height: "100vh", position: "relative" }}>
           <Canvas shadows>
-            <DeskScene onComputerClick={handleComputerClick} onBooksClick={handleBooksClick} />
+            <DeskScene
+            gameState={gameState}
+            onComputerClick={handleComputerClick}
+            onBooksClick={handleBooksClick} 
+            onPaperClick={handlePaperClick}
+            />
+            
             {gameState === "notegame" && (
               <NoteGame hitCount={hitCount} setHitCount={setHitCount} setLastNote={setLastNote} />
             )}
-            <Paper onPointerDown={handlePaperClick} />
             <OrbitControls 
               enablePan={false} 
-              enableZoom={false} 
+              // enableZoom={false} 
               enableRotate={false} 
             />
             {gameState === "inputOverlay" && (

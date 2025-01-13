@@ -8,12 +8,10 @@ export default function Computer({ gameState, position, onClick }) {
   const computerRef = useRef();
 
   // Define which states the computer should be active in
-  const isActive = gameState === "startgame" || 
-                  gameState === "notegame";
+  const isActive = gameState === "startgame";
 
   // Define which states the computer is interactive in
-  const isInteractive = gameState === "startgame" || 
-                    gameState === "notegame";
+  const isInteractive = gameState === "startgame";
 
   const handlePointerOver = (e) => {
     console.log(gameState);

@@ -82,6 +82,7 @@ function App() {
     }
   };
 
+
   const handleSubmit = async () => {
     setIsLoading(true);
     setIsFloating(false); // Hide the InputOverlay immediately when submitting
@@ -245,12 +246,13 @@ function App() {
             <DeskScene
             gameState={gameState}
             onComputerClick={handleComputerClick}
-            onBooksClick={handleBooksClick} />
+            onBooksClick={handleBooksClick} 
+            onPaperClick={handlePaperClick}
+            />
             
             {gameState === "notegame" && (
               <NoteGame hitCount={hitCount} setHitCount={setHitCount} setLastNote={setLastNote} />
             )}
-            <Paper onPointerDown={handlePaperClick} />
             <OrbitControls 
               enablePan={false} 
               // enableZoom={false} 

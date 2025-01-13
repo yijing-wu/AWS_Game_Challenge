@@ -3,7 +3,7 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-export default function Paper({ gameState, position, onPointerDown }) {
+export default function Paper({ gameState, position, onClick }) {
   const { scene } = useGLTF("/models/letter.glb");
   const paperRef = useRef();
   const [isHovered, setIsHovered] = useState(false);
@@ -58,24 +58,15 @@ export default function Paper({ gameState, position, onPointerDown }) {
     }
   });
 
-  const handleClick = () => {
-    console.log("Paper clicked!");
-    
-    // Call onPointerDown to trigger the input overlay
-    if (onPointerDown) {
-      onPointerDown();
-    }
-  };
-
   return (
-    <group>
+    <group >
       <primitive
         ref={paperRef}
         object={scene}
         position={position}
         scale={[0.05, 0.05, 0.05]}
         rotation={[0, -90, 20]}
-        onClick={handleClick}
+        onClick={onClick}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       />

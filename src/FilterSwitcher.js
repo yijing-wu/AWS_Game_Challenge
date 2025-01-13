@@ -136,9 +136,9 @@ const FilterSwitcher = ({ onConfirm }) => {
         </Canvas>
       </div>
       <div className="controls">
-        <button className="arrow left" onClick={() => handleArrowClick('left')}>
+        {/* <button className="arrow left" onClick={() => handleArrowClick('left')}>
           ←
-        </button>
+        </button> */}
         <div className="current-key">
           <div
             className="note-animation"
@@ -150,8 +150,9 @@ const FilterSwitcher = ({ onConfirm }) => {
             {keys[currentIndex].replace(/([A-Z])/g, ' $1')}
           </span>
         </div>
+
         <button className="arrow right" onClick={() => handleArrowClick('right')}>
-          →
+        ⟳
         </button>
       </div>
       <button className="confirm-button" onClick={handleConfirmClick}>

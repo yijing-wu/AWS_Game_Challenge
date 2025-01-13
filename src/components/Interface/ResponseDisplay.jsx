@@ -31,6 +31,58 @@ const HtmlContainer = ({ content, index, isSelected, onSelect }) => {
   );
 };
 
+const retryMessageContainer = ({ content, clearHtmlContents }) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          flex: 1,
+          minWidth: "300px",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+          backgroundColor: "#ffffff",
+          margin: "10px",
+          cursor: "pointer",
+          border: "1px solid #ccc",
+          transition: "all 0.3s ease",
+        }}
+      >
+        <div
+          dangerouslySetInnerHTML={{ __html: content }}
+          style={{
+            maxWidth: "100%",
+            overflow: "auto",
+          }}
+        />
+      </div>
+      <button
+        onClick={clearHtmlContents}
+        style={{
+          padding: "12px 24px",
+          fontSize: "16px",
+          backgroundColor: "#3498db",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          cursor: "pointer",
+          margin: "20px auto",
+          transition: "all 0.3s ease",
+        }}
+      >
+        Sounds good, let's try again
+      </button>
+    </div>
+  );
+};
+
 const LoadingSpinner = () => {
   return (
     <div style={{
@@ -255,7 +307,12 @@ const EmailInput = ({ onSubmit, onCancel }) => {
   );
 };
 
-const ResponseDisplay = ({ htmlContents, isLoading, onChoiceSubmitted }) => {
+const ResponseDisplay = ({
+  htmlContents,
+  isLoading,
+  onChoiceSubmitted,
+  clearHtmlContents,
+}) => {
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showEmailInput, setShowEmailInput] = useState(false);
@@ -309,75 +366,124 @@ const ResponseDisplay = ({ htmlContents, isLoading, onChoiceSubmitted }) => {
   }
 
   return (
-    <>
-      <div style={{
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-        padding: '20px',
-        borderRadius: '15px',
-        maxHeight: '80vh',
+    <div className="response-display-overlay" style={{
+      position: 'fixed', // Changed from absolute to fixed for better overlay behavior
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)', // Added overlay background
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 999,
+    }}>
+      <div className="response-display-container" style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        padding: '30px',
+        borderRadius: '20px',
+        maxHeight: '90vh',
+        width: '90%',
+        maxWidth: '1200px', // Added maxWidth for better readability on large screens
         overflowY: 'auto',
-        width: '80%',
-        zIndex: 1000,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)', // Added shadow for depth
+        position: 'relative', // For positioning close button if needed
       }}>
-        <div style={{
-          textAlign: 'center',
-          marginBottom: '20px',
-          color: '#2c3e50'
+        <div className="response-content" style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px",
         }}>
-          <h2>Choose your favorite version</h2>
-          <p>Click on a card to select it, then click "Choose This One" to confirm</p>
+          {htmlContents.some((content) => content.includes("<html>")) ? (
+            <>
+              <div className="header" style={{
+                textAlign: 'center',
+                marginBottom: '20px',
+                borderBottom: '1px solid #eee',
+                paddingBottom: '20px',
+              }}>
+                <h2 style={{ 
+                  color: '#2c3e50',
+                  marginBottom: '10px',
+                }}>Choose your favorite version</h2>
+                <p style={{ 
+                  color: '#666',
+                  fontSize: '16px',
+                }}>
+                  Click on a card to select it, then click "Choose This One" to confirm
+                </p>
+              </div>
+  
+              <div className="cards-container" style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "20px",
+                justifyContent: "center",
+                padding: '10px',
+              }}>
+                {htmlContents.map((content, index) => (
+                  <HtmlContainer
+                    key={index}
+                    content={content}
+                    index={index}
+                    isSelected={selectedIndex === index}
+                    onSelect={handleSelect}
+                  />
+                ))}
+              </div>
+  
+              <div className="action-buttons" style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '15px',
+                marginTop: '20px',
+              }}>
+                <button
+                  onClick={handleProceedToEmail}
+                  disabled={selectedIndex === null}
+                  style={{
+                    padding: "14px 28px",
+                    fontSize: "16px",
+                    backgroundColor: selectedIndex !== null ? "#3498db" : "#cccccc",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    cursor: selectedIndex !== null ? "pointer" : "not-allowed",
+                    transition: "all 0.3s ease",
+                    fontWeight: '500',
+                    minWidth: '200px',
+                  }}
+                  onMouseOver={(e) => {
+                    if (selectedIndex !== null) {
+                      e.target.style.backgroundColor = '#2980b9'
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (selectedIndex !== null) {
+                      e.target.style.backgroundColor = '#3498db'
+                    }
+                  }}
+                >
+                  Choose This One
+                </button>
+              </div>
+            </>
+          ) : (
+            retryMessageContainer({
+              content: htmlContents[0],
+              clearHtmlContents,
+            })
+          )}
         </div>
-
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '20px',
-          justifyContent: 'center'
-        }}>
-          {htmlContents.map((content, index) => (
-            <HtmlContainer 
-              key={index} 
-              content={content} 
-              index={index}
-              isSelected={selectedIndex === index}
-              onSelect={handleSelect}
-            />
-          ))}
-        </div>
-
-        <button
-          onClick={handleProceedToEmail}
-          disabled={selectedIndex === null}
-          style={{
-            padding: '12px 24px',
-            fontSize: '16px',
-            backgroundColor: selectedIndex !== null ? '#3498db' : '#cccccc',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: selectedIndex !== null ? 'pointer' : 'not-allowed',
-            margin: '20px auto',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          Choose This One
-        </button>
       </div>
-
+  
       {showEmailInput && (
         <EmailInput 
           onSubmit={handleSubmitChoice}
           onCancel={() => setShowEmailInput(false)}
         />
       )}
-    </>
+    </div>
   );
 };
 

@@ -91,14 +91,6 @@ function App() {
     try {
       const data = await generateContent(formData);
       setHtmlContents(data);
-      setFormData({
-        receiver: '',
-        relationship: '',
-        holiday: '',
-        additional_info: '',
-        tone: '',
-        sender: ''
-      });
     } catch (error) {
       console.error("Error:", error);
       setIsFloating(true); // Show the form again if there's an error
@@ -297,6 +289,11 @@ function App() {
             htmlContents={htmlContents}
             isLoading={isLoading}
             onChoiceSubmitted={handleChoiceSubmitted}
+            clearHtmlContents={() => {  
+              // Show the form again if generation content does not include html
+              setHtmlContents([]);
+              setIsFloating(true);
+            }}
           />
         </div>
       )}

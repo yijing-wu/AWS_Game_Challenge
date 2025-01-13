@@ -53,7 +53,7 @@ ___[sender]___`;
                 return (
                   <textarea
                     key={index}
-                    placeholder={part}
+                    placeholder={"Add any supplementary information here!"}
                     value={text[part] || ''}
                     onChange={(e) => handleInputChange(e.target.value, part)}
                     style={{

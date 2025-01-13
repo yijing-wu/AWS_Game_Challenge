@@ -91,14 +91,6 @@ function App() {
     try {
       const data = await generateContent(formData);
       setHtmlContents(data);
-      setFormData({
-        receiver: '',
-        relationship: '',
-        holiday: '',
-        additional_info: '',
-        tone: '',
-        sender: ''
-      });
     } catch (error) {
       console.error("Error:", error);
       setIsFloating(true); // Show the form again if there's an error
@@ -283,7 +275,7 @@ function App() {
           >
             {gameState === "notegame" && (
               <>
-                <div>You need to click {10-hitCount} more 🎵 to create your own music</div>
+                <div>You need to click {Math.max(0, 10-hitCount)} more 🎵 to create your own music</div>
                 <div>The ball you received is {lastNote} note</div>
               </>
             )}
@@ -297,6 +289,11 @@ function App() {
             htmlContents={htmlContents}
             isLoading={isLoading}
             onChoiceSubmitted={handleChoiceSubmitted}
+            clearHtmlContents={() => {  
+              // Show the form again if generation content does not include html
+              setHtmlContents([]);
+              setIsFloating(true);
+            }}
           />
         </div>
       )}

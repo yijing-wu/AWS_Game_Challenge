@@ -41,23 +41,37 @@ const FilterSwitcher = ({ onConfirm }) => {
     }
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [previousIndex, setPreviousIndex] = useState(null);
   const [animate, setAnimate] = useState(true);
+  const [exitAnimate, setExitAnimate] = useState(false);
 
-  // Handle arrow navigation
   const handleArrowClick = (direction) => {
+
+    // Store current index as previous
+    setPreviousIndex(currentIndex);
+
+    // Calculate new index
     let newIndex = currentIndex;
     if (direction === 'left') {
-      newIndex = (currentIndex - 1 + keys.length) % keys.length;
+      newIndex = (currentIndex - 1 + planets.length) % planets.length;
     } else if (direction === 'right') {
-      newIndex = (currentIndex + 1) % keys.length;
+      newIndex = (currentIndex + 1) % planets.length;
     }
-    setCurrentIndex(newIndex);
+
     changeKey(keys[newIndex]);
 
-    // Reset animation
-    setAnimate(false);
-    setTimeout(() => setAnimate(true), 50);
+    // Start both animations
+    setExitAnimate(true);
+    setCurrentIndex(newIndex);
+    setAnimate(true);
+
+    // Reset exit animation after it completes
+    setTimeout(() => {
+      setExitAnimate(false);
+      setPreviousIndex(null);
+    }, 2000); // Match this with your animation duration
   };
+
 
   // Update the background color and note color based on the current index
   // useEffect(() => {
@@ -89,17 +103,27 @@ const FilterSwitcher = ({ onConfirm }) => {
           <ambientLight intensity={2} />
           <directionalLight position={[10, 10, 10]} intensity={1.5} />
           <directionalLight position={[-10, -10, -10]} intensity={0.5} />
-          <Suspense fallback={
-            <mesh>
-              <sphereGeometry args={[1, 16, 16]} />
-            </mesh>
-          }>
+          <Suspense fallback={null}>
+            {/* Exiting Planet */}
+            {previousIndex !== null && exitAnimate && (
+              <Planet
+                key={`exit-${planets[previousIndex].name}`}
+                modelPath={`/models/planets/${planets[previousIndex].name}.${planets[previousIndex].extension}`}
+                scale={planets[previousIndex].scale}
+                rotation={planets[previousIndex].rotation}
+                animate={false}
+                exitAnimate={true}
+              />
+            )}
+
+            {/* Entering Planet */}
             <Planet
-              key={`${planets[currentIndex].name}-${currentIndex}`}
+              key={`enter-${planets[currentIndex].name}`}
               modelPath={`/models/planets/${planets[currentIndex].name}.${planets[currentIndex].extension}`}
               scale={planets[currentIndex].scale}
               rotation={planets[currentIndex].rotation}
               animate={animate}
+              exitAnimate={false}
             />
             <OrbitControls
               enableZoom={false}

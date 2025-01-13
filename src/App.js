@@ -102,7 +102,8 @@ function App() {
     setIsLoading(false); // Reset loading state
     setIsFloating(false); // Hide the input overlay
     // Optionally show a success message
-    alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
+    // alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
+    setGameState("gameover");
   };
 
   const generateRandomFileName = () => {
@@ -299,6 +300,44 @@ function App() {
           />
         </div>
       )}
+
+{gameState === "gameover" && (
+  <div style={{
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    color: "white",
+    fontFamily: "'Pacifico', cursive",
+    zIndex: 2
+  }}>
+    <div style={{
+      fontSize: "50px",
+      marginBottom: "20px"
+    }}>
+      Thanks for Playing!
+    </div>
+    <div style={{
+      fontSize: "24px",
+      marginBottom: "30px"
+    }}>
+      Your card has been sent successfully!
+    </div>
+    <div style={{
+      fontSize: "20px",
+      marginBottom: "30px"
+    }}>
+      As we step into new year, we hope everyone remembers to reconnect our old friends and cherish the bonds that have shaped our lives!
+    </div>
+  </div>
+)}
+
     </div>
   );  
 }

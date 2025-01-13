@@ -251,7 +251,7 @@ function App() {
             )}
             <OrbitControls 
               enablePan={false} 
-              // enableZoom={false} 
+              enableZoom={false} 
               enableRotate={false} 
             />
             {gameState === "inputOverlay" && (

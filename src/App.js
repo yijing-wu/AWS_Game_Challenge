@@ -275,7 +275,7 @@ function App() {
           >
             {gameState === "notegame" && (
               <>
-                <div>You need to click {10-hitCount} more 🎵 to create your own music</div>
+                <div>You need to click {Math.max(0, 10-hitCount)} more 🎵 to create your own music</div>
                 <div>The ball you received is {lastNote} note</div>
               </>
             )}

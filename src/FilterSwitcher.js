@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, OrthographicCamera } from '@react-three/drei';
 import './FilterSwitcher.css';
 import { changeKey } from './music';
 import Planet from './Planet';
@@ -12,35 +12,36 @@ const FilterSwitcher = ({ onConfirm }) => {
     { 
       name: 'saturn', 
       extension: 'glb',
-      scale: [0.007, 0.007, 0.007], // Adjust these values as needed
+      scale: [0.0035, 0.0035, 0.0035], // Adjust these values as needed
       rotation: [0.1, 0, 0]
     },
     { 
       name: 'mars', 
       extension: 'glb',
-      scale: [0.1, 0.1, 0.1],
+      scale: [0.04, 0.04, 0.04],
       rotation: [0, 0, 0]
     },
     { 
       name: 'moon', 
       extension: 'glb',
-      scale: [0.1, 0.1, 0.1],
+      scale: [0.04, 0.04, 0.04],
       rotation: [0, 0, 0]
     },
     { 
       name: 'mercury', 
       extension: 'glb',
-      scale: [0.1, 0.1, 0.1],
+      scale: [0.04, 0.04, 0.04],
       rotation: [0, 0, 0]
     },
     { 
       name: 'sun', 
       extension: 'glb',
-      scale: [0.1, 0.1, 0.1],
+      scale: [0.04, 0.04, 0.04],
       rotation: [0, 0, 0]
     }
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [animate, setAnimate] = useState(true);
 
   // Handle arrow navigation
   const handleArrowClick = (direction) => {
@@ -52,30 +53,45 @@ const FilterSwitcher = ({ onConfirm }) => {
     }
     setCurrentIndex(newIndex);
     changeKey(keys[newIndex]);
+
+    // Reset animation
+    setAnimate(false);
+    setTimeout(() => setAnimate(true), 50);
   };
 
   // Update the background color and note color based on the current index
-  useEffect(() => {
-    document.body.style.background = colors[currentIndex];
-  }, [currentIndex]);
+  // useEffect(() => {
+  //   document.body.style.background = colors[currentIndex];
+  // }, [currentIndex]);
 
   // Handle "Confirm" button click
   const handleConfirmClick = () => {
-    onConfirm(keys[currentIndex]); 
-    document.body.style.background = ''; 
+    onConfirm(keys[currentIndex]);
+    document.body.style.background = '';
   };
-  
+
 
   return (
     <div className="filter-switcher">
       <div className="planet-viewer">
-        <Canvas camera={{ position: [0, 0, 15] }}>
-          <ambientLight intensity={3} />
-          <pointLight position={[0, 0, 0]} />
+        <Canvas
+          flat
+          linear
+          style={{ position: 'absolute' }}
+        >
+          <OrthographicCamera
+            makeDefault
+            position={[0, 0, 50]}
+            zoom={50}
+            near={-1000}
+            far={1000}
+          />
+          <ambientLight intensity={2} />
+          <directionalLight position={[10, 10, 10]} intensity={1.5} />
+          <directionalLight position={[-10, -10, -10]} intensity={0.5} />
           <Suspense fallback={
             <mesh>
               <sphereGeometry args={[1, 16, 16]} />
-              <meshStandardMaterial color={colors[currentIndex]} wireframe />
             </mesh>
           }>
             <Planet
@@ -83,8 +99,15 @@ const FilterSwitcher = ({ onConfirm }) => {
               modelPath={`/models/planets/${planets[currentIndex].name}.${planets[currentIndex].extension}`}
               scale={planets[currentIndex].scale}
               rotation={planets[currentIndex].rotation}
+              animate={animate}
             />
-            <OrbitControls enableZoom={false} />
+            <OrbitControls
+              enableZoom={false}
+              enablePan={false}
+              minPolarAngle={Math.PI / 2.5}
+              maxPolarAngle={Math.PI / 1.5}
+              rotateSpeed={0.3}
+            />
           </Suspense>
         </Canvas>
       </div>
@@ -112,6 +135,7 @@ const FilterSwitcher = ({ onConfirm }) => {
       </button>
     </div>
   );
+
 };
 
 export default FilterSwitcher;

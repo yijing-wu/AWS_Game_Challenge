@@ -144,11 +144,10 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote, gameState
       {/* Main central light source */}
       <pointLight
         ref={mainLightRef}
-        position={[0, 1, 4.4]} // Positioned above the game area
-        angle={0.6}
+        position={[0, 0.4, 4.6]} // Positioned above the game area
         penumbra={0.5}
-        intensity={isOn ? 3 : 0}
-        color="#ffffff"
+        intensity={isOn ? 4 : 0}
+        color="#ffcea1"
         castShadow
       />
 

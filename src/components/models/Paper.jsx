@@ -17,8 +17,7 @@ export default function Paper({ gameState, position, onClick }) {
                     gameState === "inputOverlay";
 
   // Define which states the books is interactive in
-  const isInteractive = gameState === "sendEmail" ||
-                        gameState === "inputOverlay";
+  const isInteractive = gameState === "sendEmail";
 
   const handlePointerOver = (e) => {
     e.stopPropagation();

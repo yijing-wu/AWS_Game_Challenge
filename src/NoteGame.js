@@ -7,6 +7,8 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote, gameState
   const [particles, setParticles] = useState([]);
   const mainLightRef = useRef();
 
+  const isOn = gameState === "notegame";
+
   // Define fixed colors for each note
   const noteColors = {
     E: '#FF0000', // Red
@@ -17,14 +19,6 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote, gameState
     C: '#4B0082', // Indigo
     D: '#8F00FF'  // Violet
   };
-
-  // Control main light based on game state
-  useEffect(() => {
-    if (mainLightRef.current) {
-      // Light on during notegame, off otherwise
-      mainLightRef.current.intensity = gameState === "notegame" ? 3 : 0;
-    }
-  }, [gameState]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -153,7 +147,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote, gameState
         position={[0, 1, 4.4]} // Positioned above the game area
         angle={0.6}
         penumbra={0.5}
-        intensity={0} // Initial intensity (will be updated based on gameState)
+        intensity={isOn ? 3 : 0}
         color="#ffffff"
         castShadow
       />

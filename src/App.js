@@ -49,8 +49,10 @@ function App() {
   }
   useEffect(() => {
     if (gameState === "notegame" && hitCount >= 10) {
-      setGameState("playSequence");
-      handlePlaySequence();
+      setTimeout(() => {
+        setGameState("playSequence");
+        handlePlaySequence();
+      }, 1000);
     }
   }, [hitCount, gameState]);
 

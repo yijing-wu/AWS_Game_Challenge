@@ -38,7 +38,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
           type: randomType,
           order: notes.indexOf(randomType),
           position: [Math.random() - 0.5, 1, 4.4],
-          speed: Math.random() * 0.001 + 0.005,
+          speed: Math.random() * 0.05 + 0.25,
           color: noteColors[randomType],
         },
       ]);
@@ -48,7 +48,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
   }, []);
 
   // Update both game objects and particles
-  useFrame(() => {
+  useFrame((state, delta) => {
     // Update game objects
     setGameObjects((prev) =>
       prev
@@ -56,7 +56,7 @@ export default function NoteGame({ hitCount, setHitCount, setLastNote }) {
           ...obj,
           position: [
             obj.position[0],
-            obj.position[1] - obj.speed,
+            obj.position[1] - obj.speed * delta,
             obj.position[2],
           ],
         }))

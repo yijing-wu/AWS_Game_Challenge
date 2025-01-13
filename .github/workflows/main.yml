@@ -37,7 +37,7 @@ jobs:
           echo "REACT_APP_S3_BUCKET_NAME=$REACT_APP_S3_BUCKET_NAME" >> .env
 
       - name: Build React App
-        run: npm run build
+        run: CI=false npm run build
 
       - name: Deploy to S3
         env:

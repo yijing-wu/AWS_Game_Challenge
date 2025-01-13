@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Sparkles } from "@react-three/drei";
+import * as THREE from 'three';
 
 export default function Computer({ gameState, position, onClick }) {
   const { scene } = useGLTF("/models/xylophone.glb");
@@ -7,12 +8,10 @@ export default function Computer({ gameState, position, onClick }) {
   const computerRef = useRef();
 
   // Define which states the computer should be active in
-  const isActive = gameState === "startgame" || 
-                  gameState === "notegame";
+  const isActive = gameState === "startgame";
 
   // Define which states the computer is interactive in
-  const isInteractive = gameState === "startgame" || 
-                    gameState === "notegame";
+  const isInteractive = gameState === "startgame";
 
   const handlePointerOver = (e) => {
     console.log(gameState);
@@ -40,14 +39,40 @@ export default function Computer({ gameState, position, onClick }) {
         scale={isHovered && isInteractive ? [13, 13, 13] : [12, 12, 12]}
         rotation={[0, Math.PI / 5, 0]}
       />
-      <pointLight
-        position={[-0.1, 0.5, 0]}
-        intensity={isActive ? 1 : 0}  // Light is on during active states
-        color="#ebbf9d"
-        angle={0.1}
-        penumbra={0.1}
+      <spotLight
+        position={[0, 0.7, 0.2]}
+        intensity={isActive ? 5 : 0}  // Light is on during active states
+        color="#ffcea1"
+        angle={0.3}
+        distance={1}
+        penumbra={0.4}
+        target={computerRef.current}
         castShadow
       />
+      {isActive && (
+      <mesh position={[0, 0, 0]} rotation={[0, 0, 0]}>
+        <coneGeometry args={[0.4, 2, 40, 40, true]} />
+        <meshBasicMaterial
+          color="#ffcea1"
+          transparent
+          opacity={0.008}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+    )}
+    {/* Particles */}
+    {isActive && (
+        <Sparkles
+          position={[0, 0, 0]}
+          count={50}
+          scale={[0.5, 2, 0.5]}
+          size={0.2}
+          speed={0.05}
+          opacity={0.3}
+          color="#ebbf9d"
+        />
+      )}
     </group>
   );
 }

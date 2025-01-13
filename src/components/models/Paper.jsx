@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Sparkles } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -17,8 +17,7 @@ export default function Paper({ gameState, position, onClick }) {
                     gameState === "inputOverlay";
 
   // Define which states the books is interactive in
-  const isInteractive = gameState === "sendEmail" ||
-                        gameState === "inputOverlay";
+  const isInteractive = gameState === "sendEmail";
 
   const handlePointerOver = (e) => {
     e.stopPropagation();
@@ -70,14 +69,40 @@ export default function Paper({ gameState, position, onClick }) {
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
       />
-      <pointLight
-        position={[0.6, 0.11, 4.25]}
-        intensity={isActive || (isHovered && isInteractive) ? 1 : 0}
-        color="#ebbf9d"
-        angle={0.5}
-        penumbra={1}
+      <spotLight
+        position={[0.5, 0.1, 4.5]}
+        intensity={isActive ? 3 : 0}  // Light is on during active states
+        color="#ffcea1"
+        angle={0.45}
+        distance={4}
+        penumbra={0.5}
+        target={paperRef.current}
         castShadow
       />
+      {isActive && (
+      <mesh position={[0.44, 0.05, 4.4]} rotation={[0.16, 0, 0]}>
+        <coneGeometry args={[0.3, 1, 3, 3, true]} />
+        <meshBasicMaterial
+          color="#ffcea1"
+          transparent
+          opacity={0.008}
+          side={THREE.DoubleSide}
+          depthWrite={false}
+        />
+      </mesh>
+    )}
+    {/* Particles */}
+    {isActive && (
+        <Sparkles
+          position={[0, 0, 0]}
+          count={50}
+          scale={[0.5, 2, 0.5]}
+          size={0.2}
+          speed={0.05}
+          opacity={0.3}
+          color="#ebbf9d"
+        />
+      )}
     </group>
   );
 }

@@ -1,89 +1,83 @@
 import React, { useRef, useState } from "react";
 import { useGLTF } from "@react-three/drei";
-import { useThree } from "@react-three/fiber";
-import { gsap } from "gsap";
+import { useFrame, useThree } from "@react-three/fiber";
+import * as THREE from "three";
 
-export default function Paper({ onFloatingComplete, ...props }) {
-  const { scene } = useGLTF("/models/paper.glb");
+export default function Paper({ gameState, position, onClick }) {
+  const { scene } = useGLTF("/models/letter.glb");
   const paperRef = useRef();
+  const [isHovered, setIsHovered] = useState(false);
   const [isViewing, setIsViewing] = useState(false);
   const { camera } = useThree();
 
-  const handleClick = () => {
-    console.log("Paper clicked!");
+  console.log("Paper component gameState:", gameState);
+
+  // Define which states the books should be active in
+  const isActive = gameState === "sendEmail" ||
+                    gameState === "inputOverlay";
+
+  // Define which states the books is interactive in
+  const isInteractive = gameState === "sendEmail" ||
+                        gameState === "inputOverlay";
+
+  const handlePointerOver = (e) => {
+    e.stopPropagation();
+    if (!isInteractive) return;
     
-    // Store original camera state
-    const originalPosition = {
-      x: camera.position.x,
-      y: camera.position.y,
-      z: camera.position.z
-    };
-    
-    const originalRotation = {
-      x: camera.rotation.x,
-      y: camera.rotation.y,
-      z: camera.rotation.z
-    };
-
-    // Get paper position
-    const paperPosition = paperRef.current.position;
-
-    // Animate camera to look down at paper
-    gsap.to(camera.position, {
-      x: originalPosition.x,
-      y: originalPosition.y - 0.1,
-      z: originalPosition.z - 0.2,
-      duration: 2,
-      ease: "power2.inOut",
-      onUpdate: () => {
-        camera.lookAt(-paperPosition); // Make camera look at paper
-      },
-      onComplete: () => {
-        if (onFloatingComplete) onFloatingComplete();
-      }
-    });
-
-    gsap.to(camera.rotation, {
-      x: -180 * (Math.PI / 180), // Tilt camera down
-      y: -180 * (Math.PI / 180),
-      z: -180 * (Math.PI / 180),
-      duration: 1,
-    });
-
-    // Handle escape to return to original view
-    const handleEscape = (e) => {
-      if (e.key === "Escape") {
-        gsap.to(camera.position, {
-          x: originalPosition.x,
-          y: originalPosition.y,
-          z: originalPosition.z,
-          duration: 2,
-          ease: "power2.inOut"
-        });
-
-        gsap.to(camera.rotation, {
-          x: originalRotation.x,
-          y: originalRotation.y,
-          z: originalRotation.z,
-          duration: 2,
-          ease: "power2.inOut"
-        });
-
-        window.removeEventListener("keydown", handleEscape);
-      }
-    };
-
-    window.addEventListener("keydown", handleEscape);
-    setIsViewing(true);
+    setIsHovered(true);
+    document.body.style.cursor = 'pointer';
   };
 
+  const handlePointerOut = (e) => {
+    e.stopPropagation();
+    if (!isInteractive) return;
+    
+    setIsHovered(false);
+    document.body.style.cursor = 'auto';
+  };
+
+  // Optional: Add smooth transition for hover effects
+  useFrame((state) => {
+    if (paperRef.current) {
+      const targetScale = (isHovered && isInteractive) ? 0.06 : 0.05;
+      paperRef.current.scale.x = THREE.MathUtils.lerp(
+        paperRef.current.scale.x,
+        targetScale,
+        0.1
+      );
+      paperRef.current.scale.y = THREE.MathUtils.lerp(
+        paperRef.current.scale.y,
+        targetScale,
+        0.1
+      );
+      paperRef.current.scale.z = THREE.MathUtils.lerp(
+        paperRef.current.scale.z,
+        targetScale,
+        0.1
+      );
+    }
+  });
+
   return (
-    <primitive
-      ref={paperRef}
-      object={scene}
-      {...props}
-      rotation={[-1.4, 0, 0]} // Initial rotation
-      onClick={handleClick}
-    />
+    <group >
+      <primitive
+        ref={paperRef}
+        object={scene}
+        position={position}
+        scale={[0.05, 0.05, 0.05]}
+        rotation={[0, -90, 20]}
+        onClick={onClick}
+        onPointerOver={handlePointerOver}
+        onPointerOut={handlePointerOut}
+      />
+      <pointLight
+        position={[0.6, 0.11, 4.25]}
+        intensity={isActive || (isHovered && isInteractive) ? 1 : 0}
+        color="#ebbf9d"
+        angle={0.5}
+        penumbra={1}
+        castShadow
+      />
+    </group>
   );
 }

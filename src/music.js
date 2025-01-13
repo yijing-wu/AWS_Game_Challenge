@@ -337,7 +337,7 @@ import {uploadToS3} from './upload.js';
         }
 
         export function playSequence() {
-            const button = document.querySelector('.play-button');
+            console.log('playSequence called at:', new Date().toISOString());
             if(isPlaying) {
                 stopSequence();
                 return;

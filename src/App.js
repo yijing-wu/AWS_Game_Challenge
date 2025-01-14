@@ -159,7 +159,7 @@ function App() {
     textAlign: "center",
     zIndex: gameState === "idle" ? 2 : 1, 
   }}>
-    <div>Welcome to the Game!</div>
+    <div>Welcome to JingleCard!</div>
     <button 
       onClick={startGame} 
       style={{

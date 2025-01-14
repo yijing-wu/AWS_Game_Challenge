@@ -89,10 +89,18 @@ Make sure you have Node.js and npm installed. Then, install dependencies:
 ### 3. Configure Environment Variables
 Create a  ```.env ``` file in the root directory and add the following environment variables:
 
- ```REACT_APP_AWS_REGION=<your-aws-region> ```
- ```REACT_APP_AWS_ACCESS_KEY=<your-aws-access-key> ```
- ```REACT_APP_AWS_ACCESS_SECRET=<your-aws-access-secret> ```
- ```REACT_APP_S3_BUCKET_NAME=<your-s3-bucket-name> ```
+        ```
+        REACT_APP_AWS_REGION=<your-aws-region>
+       ```
+        ```
+        REACT_APP_AWS_ACCESS_KEY=<your-aws-access-key>
+       ```
+        ```
+        REACT_APP_AWS_ACCESS_SECRET=<your-aws-access-secret>
+        ```
+        ```
+        REACT_APP_S3_BUCKET_NAME=<your-s3-bucket-name>
+        ```
 
 Replace  ```<your-aws-region> ```,  ```<your-aws-access-key> ```,  ```<your-aws-access-secret> ```, and  ```<your-s3-bucket-name>  ```with your actual AWS credentials and configuration details.
 

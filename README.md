@@ -11,7 +11,6 @@
 video: https://youtu.be/ZeEgnOYpwLs
 
 1.**Inspiration**  
-
 This game is designed to help players express love and gratitude through music and words on holidays and special occasions. It encourages meaningful connections by turning collected musical notes into personalized melodies that convey heartfelt emotions.  
 Our team of four members, who were once classmates, created this game to bridge the physical distance between us after graduation as we now live across the globe. Despite being separated by oceans, music, and warm words have kept us close.  
 The game reflects our shared humanistic values and showcases the charm of combining creativity with technology, inspiring players to connect with their loved ones in an innovative and emotional way.  
@@ -88,14 +87,14 @@ Make sure you have Node.js and npm installed. Then, install dependencies:
    ```
 
 ### 3. Configure Environment Variables
-Create a .env file in the root directory and add the following environment variables:
+Create a  ```.env ``` file in the root directory and add the following environment variables:
 
-REACT_APP_AWS_REGION=<your-aws-region>
-REACT_APP_AWS_ACCESS_KEY=<your-aws-access-key>
-REACT_APP_AWS_ACCESS_SECRET=<your-aws-access-secret>
-REACT_APP_S3_BUCKET_NAME=<your-s3-bucket-name>
+ ```REACT_APP_AWS_REGION=<your-aws-region> ```
+ ```REACT_APP_AWS_ACCESS_KEY=<your-aws-access-key> ```
+ ```REACT_APP_AWS_ACCESS_SECRET=<your-aws-access-secret> ```
+ ```REACT_APP_S3_BUCKET_NAME=<your-s3-bucket-name> ```
 
-Replace <your-aws-region>, <your-aws-access-key>, <your-aws-access-secret>, and <your-s3-bucket-name> with your actual AWS credentials and configuration details.
+Replace  ```<your-aws-region> ```,  ```<your-aws-access-key> ```,  ```<your-aws-access-secret> ```, and  ```<your-s3-bucket-name>  ```with your actual AWS credentials and configuration details.
 
 
 

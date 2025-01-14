@@ -1,4 +1,5 @@
-# AWS Dev Challenge Project
+# AWS Dev Challenge Project - Jingle Card
+Music-AI-powered greeting cards for heartfelt connections.
 
 ## Table of Contents
 - [Project Overview](#project-overview)

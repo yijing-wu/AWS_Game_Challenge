@@ -10,21 +10,23 @@
 ## Project Overview
 video: https://youtu.be/ZeEgnOYpwLs
 
+**Inspiration**  
+
 This game is designed to help players express love and gratitude through music and words on holidays and special occasions. It encourages meaningful connections by turning collected musical notes into personalized melodies that convey heartfelt emotions.  
 Our team of four members, who were once classmates, created this game to bridge the physical distance between us after graduation as we now live across the globe. Despite being separated by oceans, music, and warm words have kept us close.  
 The game reflects our shared humanistic values and showcases the charm of combining creativity with technology, inspiring players to connect with their loved ones in an innovative and emotional way.  
 As we step into 2025 new year, we hope everyone remembers to reconnect with old friends and cherish the bonds that have shaped our lives.
 
-### Challenges we ran into  
+**Challenges we ran into**  
 Some of the biggest challenges we faced involved integrating multiple Amazon AWS services seamlessly, especially ensuring smooth data flow between the game, generative AI, and the email delivery system. Debugging unexpected behavior across the pipeline also required significant effort and teamwork.
 
-### Accomplishments that we're proud of  
+**Accomplishments that we're proud of**  
 We are proud of creating a game that helps people reconnect and express their emotions in a thoughtful way. Our biggest accomplishment is enabling players to easily share their feelings of love and gratitude with friends and family at the start of a new year, fostering deeper connections despite physical distances.
 
-### What we learned  
+**What we learned**  
 Throughout this journey, we gained extensive knowledge about Amazon AWS Services and how to use them effectively in building scalable and interactive applications. From learning how to manage secure APIs to leveraging generative AI for creating personalized content, this project has been a tremendous learning experience.
 
-### What's next for Untitled  
+**What's next for Untitled**
 Moving forward, we plan to expand the features of the game, including:  
 - Adding multiplayer modes for collaborative music creation,  
 - Introducing more dynamic music styles and instruments for greater personalization,  

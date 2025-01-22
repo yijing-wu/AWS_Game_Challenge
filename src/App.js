@@ -9,6 +9,7 @@ import InputOverlay from "./components/Interface/InputOverlay";
 import Paper from "./components/models/Paper";
 import ResponseDisplay from "./components/Interface/ResponseDisplay";
 import { generateContent } from "./components/services/api";
+import ReactGA from 'react-ga4';
 
 function App() {
   const [gameState, setGameState] = useState("idle"); // "idle", "notegame", "selectFilter", "sendEmail"
@@ -29,6 +30,11 @@ function App() {
     music_link: ""
   });
 
+  useEffect(() => {
+    ReactGA.initialize(process.env.REACT_APP_GA_MEASUREMENT_ID);
+    ReactGA.send({ hitType: 'pageview', page: window.location.pathname });
+  }, []);
+
   const startGame = () => {
     setGameState("startgame"); 
     playBgm();
@@ -37,6 +43,7 @@ function App() {
       setIsLoadingScreen(false); // Hide loading screen after delay
       setGameState("startgame");
     }, 3000);
+    ReactGA.event({category: 'GameState', action: 'StartGame'});
   };
 
   const handleComputerClick = () => {
@@ -45,12 +52,14 @@ function App() {
       setHitCount(0);
       setLastNote("");
       stopBgm();
+      ReactGA.event({category: 'GameState', action: 'NoteGame'});
     }
   }
   useEffect(() => {
     if (gameState === "notegame" && hitCount >= 10) {
       setTimeout(() => {
         setGameState("playSequence");
+        ReactGA.event({category: 'GameState', action: 'PlaySequence'});
       }, 1000);
     }
   }, [hitCount, gameState]);
@@ -66,6 +75,7 @@ function App() {
   const handleBooksClick = () => {
     if (gameState === "playSequence") {
       setGameState("selectFilter");
+      ReactGA.event({category: 'GameState', action: 'SelectFilter'});
     }
   };
 
@@ -73,12 +83,14 @@ function App() {
     // Download the music file
     handleDownload();
     setGameState("sendEmail");
+    ReactGA.event({category: 'GameState', action: 'SendEmail'});
   };
 
   const handlePaperClick = () => {
     if (gameState === "sendEmail") {
       setGameState("inputOverlay");
       setIsFloating(true);
+      ReactGA.event({category: 'GameState', action: 'InputOverlay'});
     }
   };
 
@@ -104,6 +116,7 @@ function App() {
     // Optionally show a success message
     // alert("Your card has been sent successfully!"); // You can replace this with a more elegant notification
     setGameState("gameover");
+    ReactGA.event({category: 'GameState', action: 'GameOver'});
   };
 
   const generateRandomFileName = () => {

@@ -35,6 +35,7 @@ jobs:
           echo "REACT_APP_AWS_ACCESS_KEY=$REACT_APP_AWS_ACCESS_KEY" >> .env
           echo "REACT_APP_AWS_ACCESS_SECRET=$REACT_APP_AWS_ACCESS_SECRET" >> .env
           echo "REACT_APP_S3_BUCKET_NAME=$REACT_APP_S3_BUCKET_NAME" >> .env
+          echo "REACT_APP_GA_MEASUREMENT_ID=G-X8E3G9ZS6Z" >> .env
 
       - name: Build React App
         run: CI=false npm run build

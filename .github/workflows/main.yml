@@ -13,14 +13,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set environment variables
-        env:
-          REACT_APP_AWS_REGION: ${{ secrets.REACT_APP_AWS_REGION }}
-          REACT_APP_AWS_ACCESS_KEY: ${{ secrets.REACT_APP_AWS_ACCESS_KEY }}
-          REACT_APP_AWS_ACCESS_SECRET: ${{ secrets.REACT_APP_AWS_ACCESS_SECRET }}
-          REACT_APP_S3_BUCKET_NAME: ${{ secrets.REACT_APP_S3_BUCKET_NAME }}
-        run: echo "Environment variables set"
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -30,6 +22,11 @@ jobs:
         run: npm install
 
       - name: Create .env file
+        env:
+          REACT_APP_AWS_REGION: ${{ secrets.REACT_APP_AWS_REGION }}
+          REACT_APP_AWS_ACCESS_KEY: ${{ secrets.REACT_APP_AWS_ACCESS_KEY }}
+          REACT_APP_AWS_ACCESS_SECRET: ${{ secrets.REACT_APP_AWS_ACCESS_SECRET }}
+          REACT_APP_S3_BUCKET_NAME: ${{ secrets.REACT_APP_S3_BUCKET_NAME }}
         run: |
           echo "REACT_APP_AWS_REGION=$REACT_APP_AWS_REGION" >> .env
           echo "REACT_APP_AWS_ACCESS_KEY=$REACT_APP_AWS_ACCESS_KEY" >> .env

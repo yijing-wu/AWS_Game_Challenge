@@ -3,12 +3,6 @@ import AWS from 'aws-sdk';
 export async function uploadToS3(audioBlob, fileName) {
 
     try {
-        // Debug: Log environment variables
-        console.log('Environment variables check:');
-        console.log('REACT_APP_AWS_REGION:', process.env.REACT_APP_AWS_REGION);
-        console.log('REACT_APP_AWS_ACCESS_KEY:', process.env.REACT_APP_AWS_ACCESS_KEY ? 'Set' : 'Not Set');
-        console.log('REACT_APP_S3_BUCKET_NAME:', process.env.REACT_APP_S3_BUCKET_NAME);
-
         // Configure the S3 client with AWS Access Key and Secret Access Key
         const s3Client = new AWS.S3({
             accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY,
